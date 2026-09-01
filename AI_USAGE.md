@@ -52,6 +52,19 @@ Each field, explained:
 
 ## Log
 
-_No implementation-level AI-assisted tasks have been completed yet._
+_No implementation-level (code/API/schema/test) AI-assisted tasks have been completed yet._
 
-This repository is currently in **Phase 1 — Repository Foundation**. No code, API, schema, or test generation has occurred. Entries will be added here as AI-assisted engineering tasks are performed in later phases.
+### Entry 001 — Formalize Requirements and Engineering Workflow
+
+* **Task** — Formalize requirements and engineering workflow (Phase 1B — Requirements & Engineering Specification).
+* **Objective** — Convert the mandatory assignment sentence and existing repository documentation into a precise, traceable engineering specification (`REQUIREMENTS.md`, `ENGINEERING_WORKFLOW.md`, `ADR-001`) before any implementation begins.
+* **Prompt** — Engineer instructions to inspect existing repository documentation (README, ARCHITECTURE, AI_USAGE, CONTRIBUTING) for consistency, then produce a formal requirements specification distinguishing workbench requirements from URL shortener requirements, an ambiguity register, an engineering workflow document defining task/AI-run/validation lifecycles and a traceability model, and an ADR on human-in-the-loop vs. autonomous AI architecture — documentation only, no application code.
+* **AI Assistance** — Requirements structuring (FR/NFR/URL-FR/URL-NFR IDs), ambiguity identification (Ambiguity Register), workflow modeling (task lifecycle, AI run lifecycle, validation states, traceability model), and ADR drafting (options analysis and recommendation).
+* **AI First Attempt** — `docs/REQUIREMENTS.md`, `docs/ENGINEERING_WORKFLOW.md`, and `docs/adr/ADR-001-human-in-the-loop-architecture.md`, produced as committed to the repository at this entry's timestamp.
+* **Engineer Review** — PENDING.
+* **Issues Found** — Not yet assessed; pending engineer review.
+* **Correction** — Not yet assessed; pending engineer review.
+* **Validation** — Only structural documentation checks have been performed (file existence, requirement ID uniqueness, cross-document terminology consistency, no accidental implementation code). No review of the requirements' or ADR's actual engineering judgment has occurred yet — that is the engineer review this entry is pending.
+* **Final Decision** — **PENDING ENGINEER REVIEW.**
+
+This repository is currently in **Phase 1B — Requirements & Engineering Specification**. No code, API, schema, or test generation has occurred. Further entries will be added as AI-assisted engineering tasks are performed in later phases.
