@@ -79,7 +79,12 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
             <select
               className="projects-dropdown"
               value={selectedProjectId || ''}
-              onChange={(e) => e.target.value && onProjectSelect?.(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value) {
+                  onProjectSelect?.(e.target.value)
+                  onNavigate('dashboard')
+                }
+              }}
               disabled={loading}
             >
               <option value="">
