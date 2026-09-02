@@ -16,7 +16,7 @@ export function NetworkBackground() {
 
     // Create particles
     const particles: Particle[] = []
-    const particleCount = 50
+    const particleCount = 80
 
     interface Particle {
       x: number
@@ -30,9 +30,9 @@ export function NetworkBackground() {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 2 + 1,
+        vx: (Math.random() - 0.5) * 1,
+        vy: (Math.random() - 0.5) * 1,
+        radius: Math.random() * 4 + 2.5,
       })
     }
 
@@ -50,7 +50,7 @@ export function NetworkBackground() {
         if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
 
         // Draw particle
-        ctx.fillStyle = 'rgba(37, 99, 235, 0.6)'
+        ctx.fillStyle = 'rgba(37, 99, 235, 0.9)'
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
         ctx.fill()
@@ -63,9 +63,10 @@ export function NetworkBackground() {
           const dy = p2.y - p1.y
           const distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 200) {
-            ctx.strokeStyle = `rgba(37, 99, 235, ${0.2 * (1 - distance / 200)})`
-            ctx.lineWidth = 1
+          if (distance < 300) {
+            const opacity = 0.6 * (1 - distance / 300)
+            ctx.strokeStyle = `rgba(37, 99, 235, ${opacity})`
+            ctx.lineWidth = 2
             ctx.beginPath()
             ctx.moveTo(p1.x, p1.y)
             ctx.lineTo(p2.x, p2.y)
