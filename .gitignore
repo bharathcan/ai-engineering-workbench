@@ -44,6 +44,10 @@ htmlcov/
 coverage.xml
 *.cover
 
+# SQLite dev database (see backend/app/core/database.py — default local persistence)
+*.db
+*.sqlite3
+
 # ==========================================================================
 # Node / React
 # ==========================================================================
