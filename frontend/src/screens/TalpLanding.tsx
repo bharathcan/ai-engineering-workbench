@@ -42,9 +42,9 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
           right: 0,
           zIndex: 1000,
           padding: '1rem 2rem',
-          background: '#fee2e2',
-          borderBottom: '2px solid #dc2626',
-          color: '#991b1b',
+          background: '#fef3c7',
+          borderBottom: '2px solid #f59e0b',
+          color: '#92400e',
           textAlign: 'center',
           fontSize: '0.95rem',
           fontWeight: 600,
@@ -64,12 +64,13 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
           <span className="projects-bar__label">Projects:</span>
           {loadError && (
             <div style={{
-              color: '#dc2626',
+              color: '#92400e',
               fontSize: '0.9rem',
               padding: '0.5rem 1rem',
-              background: '#fee2e2',
+              background: '#fef3c7',
               borderRadius: '4px',
-              marginRight: '1rem'
+              marginRight: '1rem',
+              border: '1px solid #f59e0b'
             }}>
               ⚠️ {loadError}
             </div>
