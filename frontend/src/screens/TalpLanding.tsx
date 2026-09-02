@@ -1,8 +1,27 @@
+import { useEffect, useState } from 'react'
 import '../styles/talp-design.css'
 import { NetworkBackground } from '../components/NetworkBackground'
+import { listRequirements, type RequirementResponse } from '../api/requirements'
 import type { ScreenId } from '../components/AppShell'
 
-export function TalpLanding({ onNavigate }: { onNavigate: (screen: ScreenId) => void }) {
+export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: {
+  onNavigate: (screen: ScreenId) => void
+  selectedProjectId?: string | null
+  onProjectSelect?: (projectId: string) => void
+}) {
+  const [projects, setProjects] = useState<RequirementResponse[]>([])
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const list = await listRequirements()
+        setProjects(list)
+      } catch {
+        setProjects([])
+      }
+    }
+    fetchProjects()
+  }, [])
   return (
     <>
       <NetworkBackground />
@@ -19,6 +38,26 @@ export function TalpLanding({ onNavigate }: { onNavigate: (screen: ScreenId) => 
           </button>
         </nav>
       </header>
+
+      {/* Projects Bar */}
+      {projects.length > 0 && (
+        <div className="projects-bar">
+          <div className="projects-bar__content">
+            <span className="projects-bar__label">Recent Projects:</span>
+            <div className="projects-bar__list">
+              {projects.slice(0, 5).map((project) => (
+                <button
+                  key={project.id}
+                  className={`project-badge ${selectedProjectId === project.id ? 'project-badge--active' : ''}`}
+                  onClick={() => onProjectSelect?.(project.id)}
+                >
+                  {project.id}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Container */}
       <div className="container">
