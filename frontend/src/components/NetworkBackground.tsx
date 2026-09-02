@@ -36,7 +36,7 @@ export function NetworkBackground() {
 
     const animate = () => {
       // Clear canvas
-      ctx.fillStyle = '#f5f7fa'
+      ctx.fillStyle = '#f5f4f0'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       // Update and draw particles
@@ -50,8 +50,8 @@ export function NetworkBackground() {
         p.x = Math.max(0, Math.min(canvas.width, p.x))
         p.y = Math.max(0, Math.min(canvas.height, p.y))
 
-        // Draw bright blue particle
-        ctx.fillStyle = '#2563eb'
+        // Draw accent color particle
+        ctx.fillStyle = '#4b4dff'
         ctx.beginPath()
         ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
         ctx.fill()
@@ -68,7 +68,7 @@ export function NetworkBackground() {
 
           if (dist < 180) {
             const alpha = (1 - dist / 180) * 0.4
-            ctx.strokeStyle = `rgba(37, 99, 235, ${alpha})`
+            ctx.strokeStyle = `rgba(75, 77, 255, ${alpha})`
             ctx.lineWidth = 1.5
             ctx.beginPath()
             ctx.moveTo(p1.x, p1.y)
