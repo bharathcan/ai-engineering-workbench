@@ -94,6 +94,37 @@ canvas {
   font-style: italic;
 }
 
+.projects-dropdown {
+  padding: 0.6rem 1rem;
+  background: white;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 300px;
+  transition: all 0.2s;
+  font-family: system-ui, sans-serif;
+}
+
+.projects-dropdown:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(75, 77, 255, 0.1);
+}
+
+.projects-dropdown:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(75, 77, 255, 0.1);
+}
+
+.projects-dropdown option {
+  padding: 0.75rem;
+  background: white;
+  color: var(--color-text);
+}
+
 .project-badge {
   padding: 0.4rem 1rem;
   background: var(--color-bg-secondary);

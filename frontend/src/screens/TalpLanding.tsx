@@ -31,25 +31,24 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
         <div className="header__logo">⚡ AI Workbench</div>
       </header>
 
-      {/* Projects Bar */}
+      {/* Projects Selector */}
       <div className="projects-bar">
         <div className="projects-bar__content">
-          <span className="projects-bar__label">All Projects:</span>
-          <div className="projects-bar__list">
+          <span className="projects-bar__label">Projects:</span>
+          <select
+            className="projects-dropdown"
+            value={selectedProjectId || ''}
+            onChange={(e) => e.target.value && onProjectSelect?.(e.target.value)}
+          >
+            <option value="">-- Select a Project --</option>
             {projects.length > 0 ? (
               projects.map((project) => (
-                <button
-                  key={project.id}
-                  className={`project-badge ${selectedProjectId === project.id ? 'project-badge--active' : ''}`}
-                  onClick={() => onProjectSelect?.(project.id)}
-                >
+                <option key={project.id} value={project.id}>
                   {project.id}
-                </button>
+                </option>
               ))
-            ) : (
-              <span className="projects-bar__empty">No projects yet. Create one to get started.</span>
-            )}
-          </div>
+            ) : null}
+          </select>
         </div>
       </div>
 
