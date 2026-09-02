@@ -1,0 +1,44 @@
+# Docker Compose foundation for the application skeleton.
+#
+# `docker compose up` starts only `backend` and `frontend` — neither
+# requires PostgreSQL or Redis yet, matching the current application code.
+#
+# `postgres` and `redis` are defined but gated behind the `with-db` profile
+# so they never start unless explicitly requested:
+#   docker compose --profile with-db up
+# They are not wired into the backend yet (DATABASE_URL / REDIS_URL are
+# unset by default) — they exist here only as a documented, opt-in target
+# for when persistence is actually implemented.
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: development
+      APP_HOST: 0.0.0.0
+      APP_PORT: "8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["with-db"]
+    environment:
+      POSTGRES_USER: workbench
+      POSTGRES_PASSWORD: workbench
+      POSTGRES_DB: workbench
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["with-db"]
+    ports:
+      - "6379:6379"
