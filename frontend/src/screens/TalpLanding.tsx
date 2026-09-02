@@ -40,12 +40,12 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
       </header>
 
       {/* Projects Bar */}
-      {projects.length > 0 && (
-        <div className="projects-bar">
-          <div className="projects-bar__content">
-            <span className="projects-bar__label">All Projects:</span>
-            <div className="projects-bar__list">
-              {projects.map((project) => (
+      <div className="projects-bar">
+        <div className="projects-bar__content">
+          <span className="projects-bar__label">All Projects:</span>
+          <div className="projects-bar__list">
+            {projects.length > 0 ? (
+              projects.map((project) => (
                 <button
                   key={project.id}
                   className={`project-badge ${selectedProjectId === project.id ? 'project-badge--active' : ''}`}
@@ -53,11 +53,13 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
                 >
                   {project.id}
                 </button>
-              ))}
-            </div>
+              ))
+            ) : (
+              <span className="projects-bar__empty">No projects yet. Create one to get started.</span>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Main Container */}
       <div className="container">
