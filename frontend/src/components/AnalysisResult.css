@@ -1,0 +1,187 @@
+.analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.analysis__summary {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.6;
+  background: #f9fafb;
+  padding: 1.25rem;
+  border-radius: 6px;
+  border-left: 4px solid #4b4dff;
+}
+
+.analysis-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.analysis-section__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.analysis-section__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111111;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.analysis-section__title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 20px;
+  background: #4b4dff;
+  border-radius: 2px;
+}
+
+.analysis-section__count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(75, 77, 255, 0.1);
+  color: #4b4dff;
+}
+
+.analysis-section--ambiguity .analysis-section__title::before {
+  background: #f59e0b;
+}
+
+.analysis-section--assumption .analysis-section__title::before {
+  background: #3b82f6;
+}
+
+.analysis-section--success .analysis-section__title::before {
+  background: #18c94a;
+}
+
+.analysis-section--engineering .analysis-section__title::before {
+  background: #dc2626;
+}
+
+.analysis-empty {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Simple ID + description grid (Functional Reqs, Constraints, Success Criteria, Eng Concerns) */
+.id-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.id-card {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #d1d5db;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #374151;
+}
+
+.id-card__id {
+  flex-shrink: 0;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-weight: 700;
+  color: #4b4dff;
+  font-size: 0.8rem;
+}
+
+/* Ambiguity / Assumption detail cards */
+.detail-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detail-card {
+  padding: 1.1rem 1.25rem;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.detail-card--ambiguity {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.detail-card--assumption {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.detail-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  gap: 0.75rem;
+}
+
+.detail-card__id {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #111111;
+}
+
+.detail-card__description {
+  font-size: 0.95rem;
+  color: #1f2937;
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}
+
+.detail-card__meta {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.3rem 0 0;
+  line-height: 1.5;
+}
+
+.detail-card__meta strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.impact-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.impact-pill--low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.impact-pill--medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.impact-pill--high {
+  background: #fee2e2;
+  color: #991b1b;
+}
