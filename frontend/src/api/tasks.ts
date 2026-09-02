@@ -176,3 +176,13 @@ export async function decideAiRun(
   }
   return response.json()
 }
+
+export async function generateArtifacts(aiRunId: string): Promise<unknown> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/ai-runs/${aiRunId}/artifacts`, {
+    method: 'POST',
+  })
+  if (!response.ok) {
+    throw new RequirementApiError(await parseErrorDetail(response), response.status)
+  }
+  return response.json()
+}

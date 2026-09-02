@@ -3,6 +3,7 @@ import { RequirementApiError } from '../api/requirements'
 import {
   decideTask,
   decideAiRun,
+  generateArtifacts,
   requestAiAssist,
   type AIAssistRequestType,
   type EngineeringTask,
@@ -264,6 +265,19 @@ function AIAssistanceSection({
     }
   }
 
+  const generateAndNotify = async (runId: string) => {
+    setRequesting(true)
+    setError(null)
+    try {
+      await generateArtifacts(runId)
+      onChanged()
+    } catch (err) {
+      setError(err instanceof RequirementApiError ? err.message : 'Failed to generate artifacts.')
+    } finally {
+      setRequesting(false)
+    }
+  }
+
   return (
     <div className="ai-assist">
       <h5>AI Assistance ({task.ai_runs.length} run(s) so far)</h5>
@@ -296,7 +310,14 @@ function AIAssistanceSection({
                   </button>
                 </div>
               ) : (
-                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Decision: {run.decisions[run.decisions.length - 1].decision}</p>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>Decision: {run.decisions[run.decisions.length - 1].decision}</p>
+                  {run.decisions[run.decisions.length - 1].decision === 'ACCEPT' && (
+                    <button type="button" style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem' }} disabled={requesting} onClick={() => generateAndNotify(run.id)}>
+                      Generate Artifacts
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ))}
