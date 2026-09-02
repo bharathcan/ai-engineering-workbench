@@ -27,6 +27,20 @@ def test_create_url_rejects_private_ip_target(client):
     assert response.status_code == 422
 
 
+def test_create_url_rejects_localhost_by_name(client):
+    response = client.post("/api/v1/urls", json={"original_url": "http://localhost:8000/admin"})
+    assert response.status_code == 422
+
+
+def test_create_url_rejects_excessively_long_url(client):
+    # Phase 12 security review (docs/security.md #2): MAX_URL_LENGTH is
+    # enforced at the schema level (app/schemas/url.py) — confirm it's
+    # actually reachable through the API, not just defined.
+    too_long = "https://example.com/" + ("a" * 2048)
+    response = client.post("/api/v1/urls", json={"original_url": too_long})
+    assert response.status_code == 422
+
+
 def test_redirect_for_valid_code_returns_307_with_location(client):
     create = client.post("/api/v1/urls", json={"original_url": "https://example.com/target"})
     short_code = create.json()["short_code"]

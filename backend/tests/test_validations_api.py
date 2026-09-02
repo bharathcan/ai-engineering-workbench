@@ -52,6 +52,28 @@ def test_validate_rejects_unsupported_validation_type(client):
     assert response.status_code == 422
 
 
+def test_validate_rejects_command_injection_attempts_in_validation_type(client):
+    """Phase 12 security review (docs/security.md #4): validation_type is a
+    closed enum at the schema level, never a raw command — there is no code
+    path from this field into subprocess.run's arguments. Confirms that
+    directly: shell-metacharacter payloads are rejected the same way any
+    other unsupported string is (422, before reaching the validation
+    runner), never executed."""
+    artifact_id = _create_artifact(client)
+    injection_attempts = [
+        "STATIC_ANALYSIS; rm -rf /",
+        "STATIC_ANALYSIS && cat /etc/passwd",
+        "$(whoami)",
+        "STATIC_ANALYSIS`id`",
+        "../../etc/passwd",
+    ]
+    for payload in injection_attempts:
+        response = client.post(
+            f"/api/v1/artifacts/{artifact_id}/validate", json={"validation_type": payload}
+        )
+        assert response.status_code == 422, f"payload {payload!r} was not rejected"
+
+
 def test_static_analysis_validation_actually_runs_and_passes(client):
     artifact_id = _create_artifact(client)
     response = client.post(
