@@ -119,6 +119,7 @@ export function AppShell() {
             project={data}
             onRequirementCreated={handleProjectCreated}
             onAnalyzed={reload}
+            onNavigate={navigateTo}
           />
         )}
         {activeScreen === 'plan' && (

@@ -10,14 +10,21 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
   onProjectSelect?: (projectId: string) => void
 }) {
   const [projects, setProjects] = useState<RequirementResponse[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        setLoading(true)
+        setLoadError(null)
         const list = await listRequirements()
         setProjects(list)
-      } catch {
+      } catch (error) {
+        setLoadError('Unable to load projects. Backend service is unavailable.')
         setProjects([])
+      } finally {
+        setLoading(false)
       }
     }
     fetchProjects()
@@ -26,137 +33,93 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
     <>
       <NetworkBackground />
 
-      {/* Header */}
-      <header className="header">
-        <div className="header__logo">⚡ AI Workbench</div>
-        <nav className="header__nav">
-          <a href="#features">Features</a>
-          <a href="#workflow">How it works</a>
-          <a href="#about">About</a>
-          <button className="header__cta" onClick={() => onNavigate('requirement')}>
-            Get Started
-          </button>
-        </nav>
-      </header>
-
-      {/* Projects Bar */}
-      {projects.length > 0 && (
-        <div className="projects-bar">
-          <div className="projects-bar__content">
-            <span className="projects-bar__label">Recent Projects:</span>
-            <div className="projects-bar__list">
-              {projects.slice(0, 5).map((project) => (
-                <button
-                  key={project.id}
-                  className={`project-badge ${selectedProjectId === project.id ? 'project-badge--active' : ''}`}
-                  onClick={() => onProjectSelect?.(project.id)}
-                >
-                  {project.id}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Error Banner */}
+      {loadError && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          padding: '1rem 2rem',
+          background: '#fef3c7',
+          borderBottom: '2px solid #f59e0b',
+          color: '#92400e',
+          textAlign: 'center',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+        }}>
+          ⚠️ {loadError}
         </div>
       )}
 
+      {/* Header */}
+      <header className="header">
+        <div className="header__logo">⚡ AI Workbench</div>
+      </header>
+
+      {/* Projects Selector */}
+      <div className="projects-bar">
+        <div className="projects-bar__content">
+          <span className="projects-bar__label">Projects:</span>
+          {loadError && (
+            <div style={{
+              color: '#92400e',
+              fontSize: '0.9rem',
+              padding: '0.5rem 1rem',
+              background: '#fef3c7',
+              borderRadius: '4px',
+              marginRight: '1rem',
+              border: '1px solid #f59e0b'
+            }}>
+              ⚠️ {loadError}
+            </div>
+          )}
+          {!loadError && (
+            <select
+              className="projects-dropdown"
+              value={selectedProjectId || ''}
+              onChange={(e) => {
+                if (e.target.value) {
+                  onProjectSelect?.(e.target.value)
+                  onNavigate('dashboard')
+                }
+              }}
+              disabled={loading}
+            >
+              <option value="">
+                {loading ? '-- Loading Projects --' : '-- Select a Project --'}
+              </option>
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.id}
+                  </option>
+                ))
+              ) : null}
+            </select>
+          )}
+        </div>
+      </div>
+
       {/* Main Container */}
-      <div className="container">
+      <div className="container" style={{ paddingTop: loadError ? '120px' : '80px' }}>
         {/* Hero Section */}
         <section className="hero">
           <div className="hero__content">
-            <span className="hero__category">.engineering</span>
+            <span className="hero__category">.dashboard</span>
             <h1 className="hero__title">
-              Transform Requirements Into <span className="hero__accent">Production Code</span>
+              AI Engineering <span className="hero__accent">Workbench</span>
             </h1>
             <p className="hero__subtitle">
-              AI-assisted engineering platform where you maintain full control. Get task breakdowns,
-              intelligent recommendations, generated artifacts, and rigorous validation.
+              Select a project above or create a new one to get started.
             </p>
             <button className="hero__cta" onClick={() => onNavigate('requirement')}>
-              Start Building
+              New Project
             </button>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="features" id="features">
-          <span className="features__category">.benefits</span>
-          <h2 className="features__title">Why Teams Choose <span className="features__accent">This Platform</span></h2>
-          <div className="features__grid">
-            <div className="feature">
-              <h3 className="feature__title">Engineer-Led</h3>
-              <p className="feature__description">
-                You make every decision. AI assists, you approve. Complete audit trail of all choices.
-              </p>
-            </div>
-            <div className="feature">
-              <h3 className="feature__title">AI-Powered</h3>
-              <p className="feature__description">
-                Analyze requirements, decompose tasks, generate code—all with intelligent assistance.
-              </p>
-            </div>
-            <div className="feature">
-              <h3 className="feature__title">Validated</h3>
-              <p className="feature__description">
-                7-stage validation pipeline ensures every artifact meets quality standards.
-              </p>
-            </div>
-            <div className="feature">
-              <h3 className="feature__title">Transparent</h3>
-              <p className="feature__description">
-                See exactly what was generated, review every decision, understand every step.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Workflow Section */}
-        <section className="workflow" id="workflow">
-          <span className="workflow__category">.how-it-works</span>
-          <h2 className="workflow__title">Build What <span className="workflow__accent">Actually Works</span></h2>
-          <div className="workflow__steps">
-            <div className="step">
-              <div className="step__number">1</div>
-              <h3 className="step__title">Requirement</h3>
-              <p className="step__description">Define what you want to build</p>
-            </div>
-            <div className="step">
-              <div className="step__number">2</div>
-              <h3 className="step__title">Analysis</h3>
-              <p className="step__description">AI identifies scope and constraints</p>
-            </div>
-            <div className="step">
-              <div className="step__number">3</div>
-              <h3 className="step__title">Planning</h3>
-              <p className="step__description">Generate task breakdown with dependencies</p>
-            </div>
-            <div className="step">
-              <div className="step__number">4</div>
-              <h3 className="step__title">Execute</h3>
-              <p className="step__description">Request AI assistance for each task</p>
-            </div>
-            <div className="step">
-              <div className="step__number">5</div>
-              <h3 className="step__title">Artifacts</h3>
-              <p className="step__description">AI generates code, tests, documentation</p>
-            </div>
-            <div className="step">
-              <div className="step__number">6</div>
-              <h3 className="step__title">Validate</h3>
-              <p className="step__description">Automated quality assurance before approval</p>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="cta">
-          <span className="cta__category">.ready</span>
-          <h2 className="cta__title">Ready to <span className="cta__accent">Transform</span> Your Engineering?</h2>
-          <p className="cta__subtitle">Start with a new project or explore existing ones</p>
-          <button className="cta__button" onClick={() => onNavigate('requirement')}>
-            Create Project
-          </button>
-        </section>
       </div>
     </>
   )

@@ -8,15 +8,18 @@ import {
   type RequirementAnalysisResult,
 } from '../api/requirements'
 import type { ProjectData } from '../hooks/useProjectData'
+import type { ScreenId } from '../components/AppShell'
 
 export function RequirementScreen({
   project,
   onRequirementCreated,
   onAnalyzed,
+  onNavigate,
 }: {
   project: ProjectData | null
   onRequirementCreated: (requirementId: string) => void
   onAnalyzed: () => void
+  onNavigate?: (screen: ScreenId) => void
 }) {
   const [text, setText] = useState('')
   const [creating, setCreating] = useState(false)
@@ -71,7 +74,30 @@ export function RequirementScreen({
 
   return (
     <section className="screen">
-      <h2>Requirement</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h2 style={{ margin: 0 }}>Requirement</h2>
+        {onNavigate && (
+          <button
+            type="button"
+            onClick={() => onNavigate('dashboard')}
+            style={{
+              padding: '0.6rem 1.5rem',
+              background: '#4b4dff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+          >
+            ← Back to Dashboard
+          </button>
+        )}
+      </div>
 
       <div className="screen-section">
         <h3>New Requirement</h3>
@@ -109,7 +135,7 @@ export function RequirementScreen({
           </p>
 
           {!project.requirement.latest_analysis && (
-            <button type="button" onClick={handleAnalyze} disabled={working}>
+            <button type="button" className="analyzer__button analyzer__button--primary" onClick={handleAnalyze} disabled={working}>
               {working ? 'Analyzing…' : 'Analyze Requirement'}
             </button>
           )}

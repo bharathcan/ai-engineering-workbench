@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { flattenAiRuns, type ProjectData } from '../hooks/useProjectData'
 import { maskSecrets } from '../utils/maskSecrets'
 import '../components/EngineeringPlanPanel.css'
+import '../components/AIRunsGrid.css'
+import { AIRunsGrid } from '../components/AIRunsGrid'
 
 export function AIRunsScreen({ project }: { project: ProjectData | null }) {
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
+
   if (!project) {
     return (
       <section className="screen">
@@ -13,6 +18,7 @@ export function AIRunsScreen({ project }: { project: ProjectData | null }) {
   }
 
   const runs = flattenAiRuns(project.plan)
+  const selectedRun = runs.find((r) => r.run.id === selectedRunId)
 
   return (
     <section className="screen">
@@ -24,14 +30,35 @@ export function AIRunsScreen({ project }: { project: ProjectData | null }) {
 
       {runs.length === 0 && <p className="app-shell__empty">No AI runs yet for this project.</p>}
 
-      <div className="flat-list screen-section">
-        {runs.map(({ task, run }) => {
-          const decision = run.decisions.length > 0 ? run.decisions[run.decisions.length - 1] : null
-          const relatedArtifacts = (project.artifactsByTaskId[task.id] ?? []).filter(
-            (a) => a.ai_run_id === run.id,
-          )
-          return (
-            <article key={run.id} className="flat-list-item">
+      {runs.length > 0 && (
+        <>
+          <AIRunsGrid
+            runs={runs}
+            selectedRunId={selectedRunId}
+            onSelectRun={setSelectedRunId}
+            project={project}
+          />
+
+          {selectedRun && (
+            <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e5e7eb' }}>
+              <h3 style={{ marginBottom: '1.5rem' }}>Run Details</h3>
+              <AIRunDetail run={selectedRun.run} task={selectedRun.task} project={project} />
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
+function AIRunDetail({ run, task, project }: { run: any; task: any; project: ProjectData }) {
+  const decision = run.decisions.length > 0 ? run.decisions[run.decisions.length - 1] : null
+  const relatedArtifacts = (project.artifactsByTaskId[task.id] ?? []).filter(
+    (a: any) => a.ai_run_id === run.id,
+  )
+
+  return (
+    <article className="flat-list-item">
               <div className="flat-list-item__header">
                 <strong>{run.id}</strong>
                 <span className="task-card__type">{run.assistance_type}</span>
@@ -109,9 +136,5 @@ export function AIRunsScreen({ project }: { project: ProjectData | null }) {
                   : 'None generated from this run'}
               </p>
             </article>
-          )
-        })}
-      </div>
-    </section>
   )
 }

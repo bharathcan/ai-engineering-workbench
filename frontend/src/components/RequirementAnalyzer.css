@@ -45,6 +45,24 @@
   cursor: not-allowed;
 }
 
+.analyzer__button--primary {
+  background: #4b4dff;
+  font-size: 1.05rem;
+  padding: 0.75rem 2rem;
+  box-shadow: 0 4px 12px rgba(75, 77, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.analyzer__button--primary:hover:not(:disabled) {
+  background: #3a3dff;
+  box-shadow: 0 6px 16px rgba(75, 77, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.analyzer__button--primary:disabled {
+  background: #d1d5db;
+}
+
 .analyzer__error {
   margin-top: 1rem;
   color: #cf222e;
