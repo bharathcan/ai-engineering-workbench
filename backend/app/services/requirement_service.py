@@ -40,6 +40,27 @@ def analyze_requirement(
     return _to_response(requirement)
 
 
+def clarify_requirement(
+    db: Session,
+    requirement_id: str,
+    clarifications: str,
+    ai_provider_factory: Callable[[], AIProvider],
+) -> RequirementResponse:
+    """Amends the same requirement in place with engineer-supplied
+    clarifications, then re-analyzes. Safe to do in place (unlike a fresh
+    requirement) because this only ever runs before any plan/task chain has
+    been built on this requirement's analysis — see the ambiguity gate."""
+    requirement = _get_or_raise(db, requirement_id)
+    requirement = requirement_repository.append_clarification(db, requirement, clarifications)
+
+    analyzer = RequirementAnalyzer(ai_provider_factory())
+    result: RequirementAnalysisResult = analyzer.analyze(requirement.text)
+
+    requirement_repository.save_analysis(db, requirement, result)
+    db.refresh(requirement)
+    return _to_response(requirement)
+
+
 def _get_or_raise(db: Session, requirement_id: str) -> Requirement:
     requirement = requirement_repository.get_requirement_by_public_id(db, requirement_id)
     if requirement is None:

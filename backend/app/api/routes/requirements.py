@@ -13,7 +13,11 @@ from app.core.exceptions import (
     PersistenceError,
     RequirementNotFoundError,
 )
-from app.schemas.requirement import RequirementCreateRequest, RequirementResponse
+from app.schemas.requirement import (
+    RequirementClarifyRequest,
+    RequirementCreateRequest,
+    RequirementResponse,
+)
 from app.services import requirement_service
 
 logger = logging.getLogger(__name__)
@@ -54,6 +58,35 @@ def analyze_requirement(
     except PersistenceError as exc:
         logger.error("Failed to persist analysis for %s: %s", requirement_id, exc)
         raise HTTPException(status_code=500, detail="Failed to store the analysis.") from exc
+
+
+@router.post("/{requirement_id}/clarify", response_model=RequirementResponse)
+def clarify_requirement(
+    requirement_id: str,
+    payload: RequirementClarifyRequest,
+    db: Session = Depends(get_db),
+    ai_provider_factory: Callable[[], AIProvider] = Depends(get_ai_provider_factory),
+):
+    try:
+        return requirement_service.clarify_requirement(
+            db, requirement_id, payload.clarifications, ai_provider_factory
+        )
+    except RequirementNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except AIProviderError as exc:
+        logger.error("AI provider failure clarifying %s: %s", requirement_id, exc)
+        raise HTTPException(
+            status_code=503, detail="The AI provider is currently unavailable. Try again later."
+        ) from exc
+    except InvalidAIResponseError as exc:
+        logger.error("Invalid AI output clarifying %s: %s", requirement_id, exc)
+        raise HTTPException(
+            status_code=502,
+            detail="The AI provider returned output that could not be validated.",
+        ) from exc
+    except PersistenceError as exc:
+        logger.error("Failed to persist clarification for %s: %s", requirement_id, exc)
+        raise HTTPException(status_code=500, detail="Failed to store the clarification.") from exc
 
 
 @router.get("", response_model=list[RequirementResponse])
