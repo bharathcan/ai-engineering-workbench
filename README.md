@@ -2,6 +2,8 @@
 
 > AI-assisted software engineering workbench that transforms software requirements into structured, validated engineering artifacts with human-in-the-loop review — demonstrated end-to-end via the mandatory use case: **build a scalable URL shortener service with APIs, persistence, and analytics.**
 
+
+
 ---
 
 ## 1. Project
