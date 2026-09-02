@@ -100,3 +100,19 @@ export async function analyzeRequirement(requirementId: string): Promise<Require
   }
   return response.json()
 }
+
+export async function getRequirement(requirementId: string): Promise<RequirementResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/requirements/${requirementId}`)
+  if (!response.ok) {
+    throw new RequirementApiError(await parseErrorDetail(response), response.status)
+  }
+  return response.json()
+}
+
+export async function listRequirements(): Promise<RequirementResponse[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/requirements`)
+  if (!response.ok) {
+    throw new RequirementApiError(await parseErrorDetail(response), response.status)
+  }
+  return response.json()
+}

@@ -115,3 +115,37 @@ def test_error_responses_do_not_leak_internal_details(client):
     analyze_response = client.post(f"/api/v1/requirements/{requirement_id}/analyze")
     assert "hunter2" not in analyze_response.text
     assert "Traceback" not in analyze_response.text
+
+
+def test_list_requirements_returns_a_list(client):
+    # This suite shares one test database across the whole session (see
+    # tests/conftest.py) — other tests may have already created
+    # requirements by the time this runs, so this only checks the shape,
+    # not that the list starts empty.
+    response = client.get("/api/v1/requirements")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+def test_list_requirements_returns_newest_first(client):
+    first = client.post("/api/v1/requirements", json={"text": "First requirement."}).json()
+    second = client.post("/api/v1/requirements", json={"text": "Second requirement."}).json()
+
+    body = client.get("/api/v1/requirements").json()
+    ids = [r["id"] for r in body]
+    # Relative order only — other tests may have added other requirements
+    # to this shared database before or after these two.
+    assert ids.index(second["id"]) < ids.index(first["id"])
+
+
+def test_list_requirements_reflects_analysis_status(client):
+    _override_ai_provider(raw_payload=VALID_URL_SHORTENER_ANALYSIS)
+    created = client.post(
+        "/api/v1/requirements", json={"text": URL_SHORTENER_REQUIREMENT_TEXT}
+    ).json()
+    client.post(f"/api/v1/requirements/{created['id']}/analyze")
+
+    response = client.get("/api/v1/requirements")
+    listed = next(r for r in response.json() if r["id"] == created["id"])
+    assert listed["status"] == "ANALYZED"
+    assert listed["latest_analysis"] is not None

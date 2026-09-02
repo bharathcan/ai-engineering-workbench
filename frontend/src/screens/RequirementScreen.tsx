@@ -1,74 +1,103 @@
 import { useState, type ReactNode } from 'react'
-import './RequirementAnalyzer.css'
+import '../components/RequirementAnalyzer.css'
 import {
   analyzeRequirement,
   createRequirement,
   RequirementApiError,
   type RequirementAnalysisResult,
 } from '../api/requirements'
-import { EngineeringPlanPanel } from './EngineeringPlanPanel'
+import type { ProjectData } from '../hooks/useProjectData'
 
-type AnalyzerState =
-  | { phase: 'idle' }
-  | { phase: 'analyzing' }
-  | { phase: 'done'; requirementId: string; result: RequirementAnalysisResult }
-  | { phase: 'error'; message: string }
-
-export function RequirementAnalyzer() {
+export function RequirementScreen({
+  project,
+  onRequirementCreated,
+  onAnalyzed,
+}: {
+  project: ProjectData | null
+  onRequirementCreated: (requirementId: string) => void
+  onAnalyzed: () => void
+}) {
   const [text, setText] = useState('')
-  const [state, setState] = useState<AnalyzerState>({ phase: 'idle' })
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleAnalyze = async () => {
-    setState({ phase: 'analyzing' })
+  const handleCreate = async () => {
+    setSubmitting(true)
+    setError(null)
     try {
       const created = await createRequirement(text)
-      const analyzed = await analyzeRequirement(created.id)
-      if (!analyzed.latest_analysis) {
-        setState({ phase: 'error', message: 'Analysis completed with no result.' })
-        return
-      }
-      setState({ phase: 'done', requirementId: created.id, result: analyzed.latest_analysis })
+      setText('')
+      onRequirementCreated(created.id)
     } catch (err) {
-      const message = err instanceof RequirementApiError ? err.message : 'Something went wrong.'
-      setState({ phase: 'error', message })
+      setError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  const isAnalyzing = state.phase === 'analyzing'
+  const handleAnalyze = async () => {
+    if (!project) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await analyzeRequirement(project.requirement.id)
+      onAnalyzed()
+    } catch (err) {
+      setError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
-    <section className="analyzer">
-      <h2>Requirement Analyzer</h2>
+    <section className="screen">
+      <h2>Requirement</h2>
 
-      <label htmlFor="requirement-input" className="analyzer__label">
-        Requirement Input
-      </label>
-      <textarea
-        id="requirement-input"
-        className="analyzer__textarea"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="e.g. Build a scalable URL shortener service with APIs, persistence, and analytics."
-        rows={4}
-        disabled={isAnalyzing}
-      />
+      <div className="screen-section">
+        <h3>New Requirement</h3>
+        <label htmlFor="requirement-input" className="analyzer__label">
+          Requirement Input
+        </label>
+        <textarea
+          id="requirement-input"
+          className="analyzer__textarea"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="e.g. Build a scalable URL shortener service with APIs, persistence, and analytics."
+          rows={4}
+          disabled={submitting}
+        />
+        <button
+          type="button"
+          className="analyzer__button"
+          onClick={handleCreate}
+          disabled={submitting || text.trim().length === 0}
+        >
+          {submitting ? 'Working…' : 'Create Requirement'}
+        </button>
+        {error && <p className="analyzer__error">{error}</p>}
+      </div>
 
-      <button
-        type="button"
-        className="analyzer__button"
-        onClick={handleAnalyze}
-        disabled={isAnalyzing || text.trim().length === 0}
-      >
-        {isAnalyzing ? 'Analyzing…' : 'Analyze Requirement'}
-      </button>
+      {project && (
+        <div className="screen-section">
+          <h3>Selected Requirement — {project.requirement.id}</h3>
+          <p>
+            <strong>Original text:</strong> {project.requirement.text}
+          </p>
+          <p>
+            <strong>Status:</strong> {project.requirement.status}
+          </p>
 
-      {state.phase === 'error' && <p className="analyzer__error">{state.message}</p>}
+          {!project.requirement.latest_analysis && (
+            <button type="button" onClick={handleAnalyze} disabled={submitting}>
+              {submitting ? 'Analyzing…' : 'Analyze Requirement'}
+            </button>
+          )}
 
-      {state.phase === 'done' && (
-        <>
-          <AnalysisResult result={state.result} />
-          <EngineeringPlanPanel requirementId={state.requirementId} />
-        </>
+          {project.requirement.latest_analysis && (
+            <AnalysisResult result={project.requirement.latest_analysis} />
+          )}
+        </div>
       )}
     </section>
   )
@@ -77,6 +106,8 @@ export function RequirementAnalyzer() {
 function AnalysisResult({ result }: { result: RequirementAnalysisResult }) {
   return (
     <div className="analysis-result">
+      <p className="badge badge--ai">AI-suggested analysis — not yet an engineering decision</p>
+
       <ResultBlock title="Summary">
         <p>{result.summary}</p>
       </ResultBlock>
@@ -162,7 +193,7 @@ function ResultBlock({
 }) {
   return (
     <div className={`result-block${tone ? ` result-block--${tone}` : ''}`}>
-      <h3>{title}</h3>
+      <h4>{title}</h4>
       {children}
     </div>
   )

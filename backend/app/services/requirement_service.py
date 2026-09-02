@@ -21,6 +21,10 @@ def get_requirement(db: Session, requirement_id: str) -> RequirementResponse:
     return _to_response(requirement)
 
 
+def list_requirements(db: Session) -> list[RequirementResponse]:
+    return [_to_response(r) for r in requirement_repository.list_requirements(db)]
+
+
 def analyze_requirement(
     db: Session, requirement_id: str, ai_provider_factory: Callable[[], AIProvider]
 ) -> RequirementResponse:

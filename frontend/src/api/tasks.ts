@@ -46,6 +46,7 @@ export interface AIRun {
   model: string
   assistance_type: AIAssistRequestType
   instructions: string | null
+  prompt: string
   status: 'COMPLETED' | 'FAILED'
   response: AIRecommendation | null
   error: string | null
@@ -104,6 +105,14 @@ export async function generatePlan(requirementId: string): Promise<EngineeringPl
     `${API_BASE_URL}/api/v1/requirements/${requirementId}/tasks`,
     { method: 'POST' },
   )
+  if (!response.ok) {
+    throw new RequirementApiError(await parseErrorDetail(response), response.status)
+  }
+  return response.json()
+}
+
+export async function getPlan(requirementId: string): Promise<EngineeringPlan> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/requirements/${requirementId}/tasks`)
   if (!response.ok) {
     throw new RequirementApiError(await parseErrorDetail(response), response.status)
   }
