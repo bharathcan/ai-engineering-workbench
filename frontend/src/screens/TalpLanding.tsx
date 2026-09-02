@@ -10,14 +10,21 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
   onProjectSelect?: (projectId: string) => void
 }) {
   const [projects, setProjects] = useState<RequirementResponse[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        setLoading(true)
+        setLoadError(null)
         const list = await listRequirements()
         setProjects(list)
-      } catch {
+      } catch (error) {
+        setLoadError('Unable to load projects. Backend service is unavailable.')
         setProjects([])
+      } finally {
+        setLoading(false)
       }
     }
     fetchProjects()
@@ -35,20 +42,37 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
       <div className="projects-bar">
         <div className="projects-bar__content">
           <span className="projects-bar__label">Projects:</span>
-          <select
-            className="projects-dropdown"
-            value={selectedProjectId || ''}
-            onChange={(e) => e.target.value && onProjectSelect?.(e.target.value)}
-          >
-            <option value="">-- Select a Project --</option>
-            {projects.length > 0 ? (
-              projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.id}
-                </option>
-              ))
-            ) : null}
-          </select>
+          {loadError && (
+            <div style={{
+              color: '#dc2626',
+              fontSize: '0.9rem',
+              padding: '0.5rem 1rem',
+              background: '#fee2e2',
+              borderRadius: '4px',
+              marginRight: '1rem'
+            }}>
+              ⚠️ {loadError}
+            </div>
+          )}
+          {!loadError && (
+            <select
+              className="projects-dropdown"
+              value={selectedProjectId || ''}
+              onChange={(e) => e.target.value && onProjectSelect?.(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">
+                {loading ? '-- Loading Projects --' : '-- Select a Project --'}
+              </option>
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.id}
+                  </option>
+                ))
+              ) : null}
+            </select>
+          )}
         </div>
       </div>
 
