@@ -33,6 +33,26 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
     <>
       <NetworkBackground />
 
+      {/* Error Banner */}
+      {loadError && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          padding: '1rem 2rem',
+          background: '#fee2e2',
+          borderBottom: '2px solid #dc2626',
+          color: '#991b1b',
+          textAlign: 'center',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+        }}>
+          ⚠️ {loadError}
+        </div>
+      )}
+
       {/* Header */}
       <header className="header">
         <div className="header__logo">⚡ AI Workbench</div>
@@ -77,7 +97,7 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
       </div>
 
       {/* Main Container */}
-      <div className="container">
+      <div className="container" style={{ paddingTop: loadError ? '120px' : '80px' }}>
         {/* Hero Section */}
         <section className="hero">
           <div className="hero__content">
