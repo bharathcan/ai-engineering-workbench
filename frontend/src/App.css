@@ -9,18 +9,18 @@ html, body, #root {
 }
 
 :root {
-  --color-primary: #f5e6d3;
-  --color-secondary: #faf5ed;
+  --color-primary: #e3e2df;
+  --color-secondary: #ececea;
   --color-accent: #4b4dff;
   --color-accent-light: #6b6dff;
   --color-success: #18c94a;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-bg: #f5e6d3;
-  --color-bg-secondary: #faf5ed;
-  --color-border: #e5dcd0;
+  --color-bg: #e3e2df;
+  --color-bg-secondary: #ececea;
+  --color-border: #d1d0cb;
   --color-text: #111111;
-  --color-text-secondary: #8c8a84;
+  --color-text-secondary: #7a7975;
   --radius: 8px;
   --radius-lg: 12px;
 }

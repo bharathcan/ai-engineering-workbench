@@ -1,13 +1,13 @@
 /* Talp.ai Minimalist Design System - Light, Bold, Animated */
 
 :root {
-  --color-bg: #f5e6d3;
-  --color-bg-secondary: #faf5ed;
+  --color-bg: #e3e2df;
+  --color-bg-secondary: #ececea;
   --color-accent: #4b4dff;
   --color-accent-light: #6b6dff;
   --color-text: #111111;
-  --color-text-secondary: #8c8a84;
-  --color-border: #e5dcd0;
+  --color-text-secondary: #7a7975;
+  --color-border: #d1d0cb;
   --color-success: #18c94a;
   --radius: 12px;
 }
@@ -20,7 +20,7 @@
 
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: #f5e6d3;
+  background: #e3e2df;
   color: var(--color-text);
   line-height: 1.6;
   overflow-x: hidden;
@@ -34,7 +34,7 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
+  background: linear-gradient(135deg, #e3e2df 0%, #ececea 100%);
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
@@ -43,7 +43,7 @@ html, body {
 main {
   position: relative;
   z-index: 1;
-  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
+  background: linear-gradient(135deg, #e3e2df 0%, #ececea 100%);
   min-height: 100vh;
 }
 
@@ -221,7 +221,7 @@ canvas {
   padding-top: 80px;
   position: relative;
   z-index: 1;
-  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
+  background: linear-gradient(135deg, #e3e2df 0%, #ececea 100%);
 }
 
 .projects-bar ~ .container {

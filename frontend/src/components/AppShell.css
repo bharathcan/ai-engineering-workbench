@@ -142,7 +142,7 @@
   flex: 1;
   overflow-y: auto;
   min-height: calc(100vh - 64px);
-  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
+  background: linear-gradient(135deg, #e3e2df 0%, #ececea 100%);
   position: relative;
 }
 
