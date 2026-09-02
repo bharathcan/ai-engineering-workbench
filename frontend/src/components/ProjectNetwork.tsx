@@ -131,6 +131,7 @@ export function ProjectNetwork({ tasks = [] }: ProjectNetworkProps) {
   return (
     <div className="project-network">
       <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
+      <div className="project-network__overlay"></div>
     </div>
   )
 }

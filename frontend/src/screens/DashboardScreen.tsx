@@ -2,6 +2,7 @@ import type { ScreenId } from '../components/AppShell'
 import { flattenAiRuns, flattenArtifacts, flattenValidations, type ProjectData } from '../hooks/useProjectData'
 import { computeWorkflowStage } from '../hooks/workflowStage'
 import { ProjectNetwork } from '../components/ProjectNetwork'
+import { FlowSteps } from '../components/FlowSteps'
 import { StageFlow } from './StageFlow'
 import { TalpLanding } from './TalpLanding'
 
@@ -33,7 +34,8 @@ function DashboardProject({ project }: { project: ProjectData }) {
   const failed = validations.filter((v) => v.validation.status === 'FAILED').length
 
   return (
-    <div className="project-dashboard">
+    <div className="project-dashboard-container">
+      <div className="project-dashboard">
       {/* Header */}
       <div className="project-header">
         <div className="project-header__content">
@@ -108,6 +110,11 @@ function DashboardProject({ project }: { project: ProjectData }) {
           </div>
         </div>
       </div>
+    </div>
+
+    <aside className="project-sidebar">
+      <FlowSteps currentStep={stage.index} />
+    </aside>
     </div>
   )
 }
