@@ -84,6 +84,8 @@ canvas {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
 }
 
 .project-badge {

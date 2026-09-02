@@ -43,9 +43,9 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
       {projects.length > 0 && (
         <div className="projects-bar">
           <div className="projects-bar__content">
-            <span className="projects-bar__label">Recent Projects:</span>
+            <span className="projects-bar__label">All Projects:</span>
             <div className="projects-bar__list">
-              {projects.slice(0, 5).map((project) => (
+              {projects.map((project) => (
                 <button
                   key={project.id}
                   className={`project-badge ${selectedProjectId === project.id ? 'project-badge--active' : ''}`}
