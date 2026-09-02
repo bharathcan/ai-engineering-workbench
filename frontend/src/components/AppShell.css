@@ -7,14 +7,14 @@
   color: var(--color-text);
 }
 
-/* Header - Professional Dark (Cursor Style) */
+/* Header - Professional Light */
 .app-shell__header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 64px;
-  background: linear-gradient(90deg, #010409 0%, #161b22 100%);
+  background: rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -22,8 +22,7 @@
   padding: 0 2rem;
   z-index: 100;
   backdrop-filter: blur(10px);
-  background-color: rgba(1, 4, 9, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .app-shell__brand {
@@ -88,14 +87,14 @@
   font-size: 0.85rem;
 }
 
-/* Navigation - Clean Minimal (v0.dev Style) */
+/* Navigation - Clean Minimal */
 .app-shell__nav {
   position: fixed;
   left: 0;
   top: 64px;
   width: 240px;
   height: calc(100vh - 64px);
-  background: var(--color-bg-secondary);
+  background: rgba(255, 255, 255, 0.7);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
@@ -103,6 +102,7 @@
   padding: 1rem 0.5rem;
   overflow-y: auto;
   z-index: 50;
+  backdrop-filter: blur(5px);
 }
 
 .app-shell__nav-item {
