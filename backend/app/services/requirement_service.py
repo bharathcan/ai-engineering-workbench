@@ -3,6 +3,7 @@ from collections.abc import Callable
 from sqlalchemy.orm import Session
 
 from app.ai.base import AIProvider
+from app.ai.prompts import build_requirement_clarification_user_prompt
 from app.core.exceptions import RequirementNotFoundError
 from app.models.requirement import Requirement
 from app.repositories import requirement_repository
@@ -54,7 +55,19 @@ def clarify_requirement(
     requirement = requirement_repository.append_clarification(db, requirement, clarifications)
 
     analyzer = RequirementAnalyzer(ai_provider_factory())
-    result: RequirementAnalysisResult = analyzer.analyze(requirement.text)
+
+    # Get prior analysis to help AI preserve ID continuity during re-analysis
+    prior_analysis = None
+    if requirement.analyses:
+        prior_analysis = requirement_repository.to_analysis_result(requirement.analyses[-1])
+        prior_summary = f"Summary: {prior_analysis.summary}\nAmbiguities resolved: {[a.id for a in prior_analysis.ambiguities]}"
+    else:
+        prior_summary = ""
+
+    # Use clarification-specific prompt to help AI preserve structure
+    result: RequirementAnalysisResult = analyzer.analyze_with_context(
+        requirement.text, clarifications, prior_summary
+    )
 
     requirement_repository.save_analysis(db, requirement, result)
     db.refresh(requirement)

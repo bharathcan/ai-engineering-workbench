@@ -37,6 +37,26 @@ def build_requirement_analysis_user_prompt(raw_text: str) -> str:
     return f"Requirement:\n{raw_text}"
 
 
+def build_requirement_clarification_user_prompt(
+    original_text: str, clarifications: str, prior_analysis_summary: str
+) -> str:
+    """Build the user prompt for re-analyzing a requirement with engineer clarifications.
+
+    This variant includes the prior analysis summary to help the AI understand what
+    was previously identified, so it can incorporate the clarifications without
+    breaking ID continuity or losing the original structure.
+    """
+    return (
+        f"Original Requirement:\n{original_text}\n\n"
+        f"Prior Analysis Summary:\n{prior_analysis_summary}\n\n"
+        f"Engineer Clarifications:\n{clarifications}\n\n"
+        f"IMPORTANT: Re-analyze using the SAME ID sequences from the prior analysis. "
+        f"Only update descriptions/details for items affected by the clarifications. "
+        f"Do NOT regenerate all IDs from scratch — preserve FR-*, NFR-*, AMB-*, etc. "
+        f"numbering from the prior analysis."
+    )
+
+
 TASK_DECOMPOSITION_SYSTEM_PROMPT = """\
 You are a senior software engineer turning an already-analyzed requirement \
 into a structured engineering plan. You are planning the work, not doing it \
