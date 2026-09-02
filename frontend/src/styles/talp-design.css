@@ -43,6 +43,8 @@ html, body {
 main {
   position: relative;
   z-index: 1;
+  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
+  min-height: 100vh;
 }
 
 canvas {
@@ -219,10 +221,27 @@ canvas {
   padding-top: 80px;
   position: relative;
   z-index: 1;
+  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
 }
 
 .projects-bar ~ .container {
   padding-top: 140px;
+}
+
+.screen {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.screen-section {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Hero Section */

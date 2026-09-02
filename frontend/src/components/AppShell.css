@@ -142,7 +142,8 @@
   flex: 1;
   overflow-y: auto;
   min-height: calc(100vh - 64px);
-  background: var(--color-bg);
+  background: linear-gradient(135deg, #f5e6d3 0%, #faf5ed 100%);
+  position: relative;
 }
 
 .app-shell__loading {
