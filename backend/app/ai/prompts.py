@@ -212,6 +212,11 @@ absolute path, and never containing "..".
 - content: the actual proposed file content.
 - description: a short note on what this artifact is and why it exists.
 
+IMPORTANT: For TEST artifacts, generate Python test files using pytest, not \
+other languages. Use standard pytest conventions (test_*.py or *_test.py, \
+test functions prefixed with test_). The validation system runs pytest -q \
+to validate all TEST artifacts.
+
 Stay within the scope of the accepted recommendation — do not invent \
 additional files, features, or changes it didn't call for. If the \
 recommendation only warrants one file, produce one artifact, not several.
