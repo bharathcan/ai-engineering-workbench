@@ -57,16 +57,21 @@ def clarify_requirement(
     analyzer = RequirementAnalyzer(ai_provider_factory())
 
     # Get prior analysis to help AI preserve ID continuity during re-analysis
-    prior_analysis = None
+    prior_analysis_text = ""
     if requirement.analyses:
         prior_analysis = requirement_repository.to_analysis_result(requirement.analyses[-1])
-        prior_summary = f"Summary: {prior_analysis.summary}\nAmbiguities resolved: {[a.id for a in prior_analysis.ambiguities]}"
-    else:
-        prior_summary = ""
+        # Format prior analysis as structured text for AI to reference
+        prior_analysis_text = (
+            f"Summary: {prior_analysis.summary}\n"
+            f"Functional Requirements: {[f'{a.id}: {a.description}' for a in prior_analysis.functional_requirements]}\n"
+            f"Ambiguities: {[f'{a.id} ({a.impact}): {a.description}' for a in prior_analysis.ambiguities]}\n"
+            f"Constraints: {[f'{a.id}: {a.description}' for a in prior_analysis.constraints]}\n"
+            f"Success Criteria: {[f'{a.id}: {a.description}' for a in prior_analysis.success_criteria]}"
+        )
 
     # Use clarification-specific prompt to help AI preserve structure
     result: RequirementAnalysisResult = analyzer.analyze_with_context(
-        requirement.text, clarifications, prior_summary
+        requirement.text, clarifications, prior_analysis_text
     )
 
     requirement_repository.save_analysis(db, requirement, result)

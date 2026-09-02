@@ -48,12 +48,15 @@ def build_requirement_clarification_user_prompt(
     """
     return (
         f"Original Requirement:\n{original_text}\n\n"
-        f"Prior Analysis Summary:\n{prior_analysis_summary}\n\n"
+        f"Prior Analysis:\n{prior_analysis_summary}\n\n"
         f"Engineer Clarifications:\n{clarifications}\n\n"
-        f"IMPORTANT: Re-analyze using the SAME ID sequences from the prior analysis. "
-        f"Only update descriptions/details for items affected by the clarifications. "
-        f"Do NOT regenerate all IDs from scratch — preserve FR-*, NFR-*, AMB-*, etc. "
-        f"numbering from the prior analysis."
+        f"CRITICAL INSTRUCTIONS:\n"
+        f"1. Preserve ALL existing IDs exactly as shown (FR-001, FR-002, etc)\n"
+        f"2. Do NOT create new IDs or renumber existing ones\n"
+        f"3. Do NOT remove any items from the prior analysis\n"
+        f"4. Only update ambiguities marked as 'RESOLVED' in clarifications\n"
+        f"5. Keep all other ambiguities unchanged with identical IDs\n"
+        f"6. Return the EXACT SAME STRUCTURE as before, with only resolved ambiguities removed\n"
     )
 
 
