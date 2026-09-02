@@ -106,6 +106,18 @@ Runs the Requirement Analyzer against the stored requirement's text and persists
 
 A failed analyze call never partially persists — the requirement's `status` stays `CREATED` and `latest_analysis` stays `null` until a call actually succeeds (see `backend/tests/test_requirements_api.py`, which asserts this for both the 503 and 502 cases).
 
+## GET /api/v1/requirements
+
+*(Added Phase 11, for the workbench UI's project selector.)* Lists all requirements, newest first, each with its `latest_analysis` if one exists. No pagination — acceptable at this project's scale; would need revisiting if requirement volume grew large enough to matter.
+
+**Response — `200 OK`** — an array of `RequirementResponse` (same shape as `POST`/`GET .../{id}` below).
+
+**Errors**
+
+| Status | Cause |
+|---|---|
+| 500 | Persistence failure |
+
 ## GET /api/v1/requirements/{requirement_id}
 
 Retrieves a requirement and its most recent analysis, if any.
@@ -284,6 +296,7 @@ Requests AI assistance for one specific task, per the Phase 5 workflow: `Approve
   "model": "claude-sonnet-5",
   "assistance_type": "CODE_GENERATION",
   "instructions": "Implement the requested functionality.",
+  "prompt": "Task: Implement short-code generation...\n\nEngineer instructions: Implement the requested functionality.",
   "status": "COMPLETED",
   "response": {
     "summary": "Use a unique database constraint.",
@@ -303,7 +316,7 @@ Requests AI assistance for one specific task, per the Phase 5 workflow: `Approve
 }
 ```
 
-(This example is `backend/tests/support/ai_recommendation_payloads.py::VALID_RECOMMENDATION`.) Note: `prompt` is persisted (for audit) but **not** included in this response — see [validation/PHASE-5-SECURITY-REVIEW.md](validation/PHASE-5-SECURITY-REVIEW.md) "AI response storage".
+(This example is `backend/tests/support/ai_recommendation_payloads.py::VALID_RECOMMENDATION`.) Note: `prompt` **is** included in this response — Phase 5 originally excluded it to minimize API surface (see [validation/PHASE-5-SECURITY-REVIEW.md](validation/PHASE-5-SECURITY-REVIEW.md) "AI response storage" for that original reasoning), but Phase 11's AI Run screen requires prompt visibility for human-in-the-loop transparency, and prompts never contain secrets by construction (verified — API keys never flow into prompt text) — see `backend/app/schemas/ai_run.py`.
 
 **A failed run is still persisted** (unlike Phase 3/4's `analyze`/`.../tasks`, where a failed call persists nothing) — `status: "FAILED"`, `response: null`, and a generic, non-internal `error` classification (never the raw provider exception text — see the security review). This gives the AI run history an honest record of failed attempts, not just successes.
 

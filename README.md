@@ -1,151 +1,109 @@
 # AI Engineering Workbench
 
-> AI-assisted software engineering workbench that transforms software requirements into structured, production-ready, and validated engineering artifacts with human-in-the-loop review.
+> AI-assisted software engineering workbench that transforms software requirements into structured, validated engineering artifacts with human-in-the-loop review — demonstrated end-to-end via the mandatory use case: **build a scalable URL shortener service with APIs, persistence, and analytics.**
 
 ---
 
-## 1. Project Overview
+## 1. Project
 
-The **AI Engineering Workbench** is a system for demonstrating how AI can be integrated responsibly into a real software engineering workflow. Rather than treating AI as a one-shot code generator, the workbench treats it as an assistant that operates *within* individual engineering tasks — requirement analysis, code generation, testing, debugging, refactoring — while the engineer remains responsible for reviewing, validating, and accepting every output before it becomes part of the system.
+`ai-engineering-workbench` is a working prototype, not a slide deck: a FastAPI backend and a React UI that take a plain-English requirement and carry it through requirement analysis, task decomposition, AI-assisted execution, engineer review, artifact generation, and validation — with every step persisted and traceable back to the requirement that motivated it. It is built in 12 completed, reviewed phases (Phases 1–12; see [AI_USAGE.md](AI_USAGE.md) for the full log and [Current Status](#14-current-status) below).
 
-The workbench is being built incrementally, in reviewed phases, starting with repository foundation and documentation before any implementation work begins.
+## 2. Problem
 
-## 2. Problem Statement
+Teams using AI to accelerate development often do it in an unstructured, unauditable way: prompts are ad hoc, outputs are accepted without review, and there's no record of what the AI got wrong or how an engineer corrected it. This project demonstrates a workflow where AI participates *within* individually-scoped tasks — never as a one-shot generator of the whole system — and every AI output passes through an explicit, recorded engineer decision (`ACCEPT`/`MODIFY`/`REJECT`) before it has any effect.
 
-Software teams are increasingly using AI tools to accelerate development, but this often happens in an unstructured, unauditable way: prompts are ad hoc, outputs are accepted without review, and there is no record of what the AI got wrong or how the engineer corrected it.
-
-The objective of this project is to demonstrate how AI can assist engineers in transforming software requirements into production-quality engineering outcomes — with a workflow that makes requirement understanding, ambiguity detection, task decomposition, AI assistance, engineer review, and validation all explicit and traceable.
-
-## 3. Core Principle
+## 3. Philosophy
 
 > **AI assists the engineer within tasks; the engineer owns execution and quality.**
 
-AI is a participant in individual tasks, not the owner of the engineering process. Every AI-assisted output passes through engineer review before it is accepted into the codebase.
+Concretely, this is enforced structurally, not just by convention:
 
-## 4. Engineering Workflow
+* No AI recommendation can generate an artifact until it has been `ACCEPT`ed (`AIRunNotAcceptedError` → `409` otherwise).
+* No artifact is `VALIDATED`-eligible until an engineer `ACCEPT`s it.
+* Validation only ever runs a fixed, allowlisted command per type — never a raw command string from a request.
+* A `HIGH`-impact unresolved ambiguity blocks task decomposition entirely (0 tasks, `status: "BLOCKED"`) rather than letting the planner guess.
+* `AIRun.status`/`Validation.status` distinguish `FAILED`/`NOT_VALIDATED` from success — missing or failed validation is never presented as a pass.
+
+This project never describes itself as autonomous software development. AI is a recommendation source; the engineer is the decision-maker at every gate.
+
+## 4. Architecture
 
 ```text
-Requirement
-     ↓
-Requirement Understanding
-     ↓
-Ambiguity Detection
-     ↓
-Task Decomposition
-     ↓
-AI-Assisted Engineering
-     ↓
-Engineer Review
-     ↓
-Code / APIs / Schema / Tests / Documentation
-     ↓
-Validation
-     ↓
-Risks & Trade-offs
-     ↓
-Final Engineering Summary
+Engineer
+   → UI (React + TypeScript, 9 screens)
+   → Requirement Analyzer     (interprets a requirement: FR/NFR/ambiguities/assumptions/constraints/risks)
+   → Engineering Planner      (decomposes into tasks; blocks on HIGH-impact ambiguity)
+   → AI Assistance            (provider-abstracted, schema-validated recommendations per task)
+   → Engineer Review          (ACCEPT / MODIFY / REJECT — required at task, AI-run, and artifact stages)
+   → Artifact Generator       (writes real proposed file content into a sandboxed workspace)
+   → Validation Engine        (allowlisted UNIT_TEST/STATIC_ANALYSIS/API_CONTRACT/BUILD/SECURITY/PERFORMANCE checks)
+   → Final Report             (aggregated summary, exportable)
 ```
 
-## 5. Core Capabilities
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full component breakdown, data flow, and security boundaries.
 
-The workbench is intended to demonstrate the following capabilities:
+## 5. Technology Stack
 
-* **Requirement analysis** — interpreting a stated requirement and identifying what it actually asks for.
-* **Ambiguity detection** — identifying underspecified or multi-interpretation requirements before implementation begins.
-* **Task decomposition** — breaking a requirement into engineer-owned, AI-assistable tasks.
-* **AI assistance** — using AI within a task (code generation, debugging, refactoring, test writing) rather than as a single end-to-end generator.
-* **Engineer review** — every AI output is explicitly reviewed and accepted, modified, or rejected.
-* **Artifact generation** — producing code, API contracts, schemas, tests, and documentation as reviewed artifacts.
-* **Validation** — checking that generated artifacts actually satisfy the requirement before acceptance.
-* **Risk analysis** — identifying security, performance, and reliability risks in generated work.
-* **Engineering summary** — a final, honest account of what was built, what was assumed, and what remains uncertain.
+Only what is actually present and used — nothing aspirational listed as current:
+
+| Layer | Technology | Status |
+|---|---|---|
+| Backend | Python 3.12, FastAPI, SQLAlchemy 2.0, Pydantic v2 | Implemented |
+| Frontend | React 19, TypeScript, Vite 8 | Implemented |
+| Frontend testing | Vitest, React Testing Library | Implemented (Phase 11) |
+| Backend testing | pytest, ruff | Implemented |
+| Database (dev/test) | SQLite (zero-dependency default) | Implemented, actually used |
+| Database (production target) | PostgreSQL | **Proposed, never deployed or tested against** — `DATABASE_URL` switches the SQLAlchemy dialect with no code change, but this has not been exercised |
+| Cache | Redis | **Not implemented** — deferred without a traffic number to justify it (ADR-003); `docker-compose.yml` defines it behind an opt-in profile, unwired |
+| AI provider | Anthropic (`anthropic` SDK), behind a provider-agnostic `AIProvider` interface | Implemented; **no live API key is configured in this environment** — see §8 |
+| Containerization | Docker (`backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml`) | Present; **not built or run in this environment** (no Docker installed here) — NOT VALIDATED |
+| API contract | OpenAPI (FastAPI auto-generated, structurally validated by the `API_CONTRACT` validation type) | Implemented |
 
 ## 6. Mandatory Use Case
 
-The mandatory assignment use case for this workbench is:
-
 > **Build a scalable URL shortener service with APIs, persistence, and analytics.**
 
-This use case is documented here as a requirement only. **It has not been implemented yet.** Implementation will proceed through the engineering workflow described above, in later phases.
+Implemented at `POST /api/v1/urls`, `GET /{short_code}`, `GET /api/v1/urls/{short_code}/analytics`, `GET /api/v1/urls/{short_code}/analytics/advanced` — see [docs/api-design-url-shortener.md](docs/api-design-url-shortener.md). **Built through the workbench, not alongside it**: its own requirement was registered and analyzed via the Requirement Analyzer, decomposed via the Task Decomposer, and routed through AI-assist → engineer review → artifact generation → artifact review → real validation — see `backend/tests/test_url_shortener_workbench_flow.py` and [docs/REQUIREMENT_TRACEABILITY.md](docs/REQUIREMENT_TRACEABILITY.md) for the real, captured chain of IDs proving it, not a description of what it should do.
+
+Key decisions: CSPRNG Base62 short codes with DB-enforced collision retry ([ADR-002](docs/adr/ADR-002-short-code-strategy.md)); no cache yet, a documented decision tied to an unresolved traffic-volume ambiguity, not an oversight ([ADR-003](docs/adr/ADR-003-cache-strategy.md)); minimal analytics by default, extended only on explicit engineer choice ([ADR-004](docs/adr/ADR-004-analytics-design.md), [ADR-005](docs/adr/ADR-005-advanced-analytics-privacy.md)).
 
 ## 7. Demonstration Scenarios
 
-The workbench is intended to demonstrate three categories of engineering scenario:
+* **Greenfield** — the URL shortener above, built from nothing. See [docs/scenarios/greenfield.md](docs/scenarios/greenfield.md).
+* **Brownfield** — the existing URL shortener had slow redirects; improved without changing its public API, including a real regression (a lost-update race) found and fixed, not glossed over. See [docs/scenarios/brownfield.md](docs/scenarios/brownfield.md).
+* **Ambiguous** — `"Improve the analytics."` was correctly blocked by the ambiguity gate until an engineer chose one of three presented interpretations. See [docs/scenarios/ambiguous.md](docs/scenarios/ambiguous.md).
 
-### Greenfield
+All three are also demonstrable live in the UI's **Scenarios** screen.
 
-Building a new system from scratch, with no pre-existing code or constraints. This is the primary mode for the URL shortener use case.
+## 8. AI Provider Configuration — Read This First
 
-### Brownfield
+**No live AI provider is configured anywhere in this development environment** (no `AI_API_KEY`). Every "AI" response referenced throughout this project's tests, demos, and documentation is produced by `FakeAIProvider` (`backend/tests/support/fake_ai_provider.py`) returning **engineer-authored** content standing in for a real provider call — this is disclosed consistently, not hidden. `AnthropicProvider` (`backend/app/ai/anthropic_provider.py`) is fully implemented against the real Anthropic Messages API and used automatically once `AI_PROVIDER=anthropic` and `AI_API_KEY` are set (see `.env.example`), but it has **never been exercised against the live API in this environment** — this is an explicit, standing `NOT VALIDATED` item, not a gap that's been quietly assumed away.
 
-Enhancing, refactoring, or fixing an existing system, where the engineer must work within existing code, constraints, and conventions rather than starting fresh.
+## 9. Setup Guide
 
-### Ambiguous
+### Prerequisites
 
-A deliberately underspecified requirement:
+* Python 3.12 (any 3.10+ should work — the codebase uses `str | None` union syntax)
+* Node.js 22+ / npm
+* No PostgreSQL, Redis, or Docker required to run locally — see §5
 
-> **Improve the analytics.**
+### Environment Variables
 
-For the ambiguous scenario, the system must explicitly identify the ambiguity and present multiple plausible interpretations to the engineer **before** any implementation is attempted. Implementation must not proceed on an ambiguous requirement without first surfacing that ambiguity.
+Copy `.env.example` to `.env` and fill in only what you need:
 
-## 8. Technology Direction
-
-The following technologies are the **proposed** direction for this project. None of them are implemented yet — they describe intent, not current state.
-
-```text
-Frontend      React + TypeScript
-Backend       Python + FastAPI
-Database      PostgreSQL
-Cache         Redis
-Testing       Pytest
-API Contract  OpenAPI
-Container     Docker
-AI            Provider abstraction
+```bash
+cp .env.example .env
 ```
 
-## 9. Repository Structure
+| Variable | Required? | Purpose |
+|---|---|---|
+| `DATABASE_URL` | No | Defaults to a local SQLite file. Set to a `postgresql+psycopg://...` URL to switch dialects (untested in this environment). |
+| `REDIS_URL` | No | Unused — no code path reads it yet. |
+| `AI_PROVIDER` / `AI_API_KEY` / `AI_MODEL` | Only for `/analyze` and AI-assist endpoints | Without these, those endpoints return a clean `503`, not a silent failure. |
+| `VITE_API_BASE_URL` | No | Frontend's backend URL; defaults to `http://localhost:8000`. |
+| `IP_HASH_SALT` | No | Salts the URL-shortener's IP hash for repeat-visitor detection (ADR-005); a random salt is generated per process start if unset. |
 
-```text
-ai-engineering-workbench/
-├── README.md
-├── AI_USAGE.md
-├── ARCHITECTURE.md
-├── CONTRIBUTING.md
-├── .gitignore
-├── .env.example
-│
-├── backend/            # FastAPI application skeleton (health check only; see backend/README.md)
-├── frontend/           # React + TypeScript application shell (see Local Development)
-├── generated/          # Generated project workspace / artifacts
-├── tests/              # Test suites
-├── scripts/            # Developer/automation scripts
-│
-├── docs/
-│   ├── adr/            # Architecture Decision Records
-│   ├── scenarios/      # Greenfield / brownfield / ambiguous scenario write-ups
-│   └── validation/     # Validation reports and evidence
-│
-└── examples/
-    ├── greenfield/     # Greenfield scenario walkthroughs
-    ├── brownfield/     # Brownfield scenario walkthroughs
-    └── ambiguous/      # Ambiguous scenario walkthroughs
-```
-
-## 10. AI-Assisted Development
-
-AI is used **task-by-task**, not as a one-shot generator of the entire system. Each unit of work — a function, an endpoint, a schema, a test suite — is scoped, given to the AI with context, reviewed by the engineer, and only then integrated. This keeps AI contributions small enough to review meaningfully and traceable back to the task and requirement that motivated them.
-
-## 11. Validation
-
-AI-generated outputs are not treated as correct by default. Every artifact — code, tests, documentation — must be validated against the originating requirement before it is accepted. Validation results (including failures) are recorded honestly; nothing is fabricated. See [AI_USAGE.md](AI_USAGE.md) for the audit trail structure used to record this.
-
-## 12. Git Workflow
-
-Development proceeds through small, meaningful, incremental commits tied to specific phases of work. At the end of each meaningful phase, work is reviewed, validated, and documented, and a commit is suggested — but not made automatically. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full phase-gate process.
-
-## 13. Local Development
-
-This section documents only what is actually implemented so far: a runnable application skeleton with a single `/health` endpoint and a frontend shell that displays backend connectivity. It does not include requirement analysis, task decomposition, AI integration, or the URL shortener — those are not implemented yet.
+**Never commit a real `.env`** — it's git-ignored; `.env.example` holds only empty placeholders.
 
 ### Backend
 
@@ -157,7 +115,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Runs with no environment variables set and no external services (PostgreSQL, Redis) running — none are required yet. See [backend/README.md](backend/README.md) for details.
+Starts with no external services. `GET /health` → `{"status": "ok"}`. OpenAPI docs at `/docs`.
 
 ### Frontend
 
@@ -167,58 +125,72 @@ npm install
 npm run dev
 ```
 
-Opens at [http://localhost:5173](http://localhost:5173). Set `VITE_API_BASE_URL` (see [.env.example](.env.example)) if the backend isn't running at the default `http://localhost:8000`.
+Opens at [http://localhost:5173](http://localhost:5173).
 
-### Tests
+### Database
+
+SQLite by default — a local file created automatically on startup, no setup needed. PostgreSQL is the proposed production target (see §5) but has not been deployed or tested in this environment; there is no migration framework yet (`Base.metadata.create_all()` at startup — a deliberate deferral while the schema is still small, not an oversight).
+
+### Redis
+
+Not used by any code path. `docker-compose.yml` defines it behind an opt-in `with-db` profile for future use.
+
+### Docker / Docker Compose
+
+`docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile` exist and describe the intended container setup (`docker compose up` for backend+frontend; `docker compose --profile with-db up` to add Postgres/Redis, unwired). **NOT VALIDATED** — Docker is not installed in this development environment, so these have never actually been built or run here.
+
+### Running Tests
 
 ```bash
-cd backend
-source .venv/bin/activate
-pytest -v
+# Backend
+cd backend && source .venv/bin/activate && pytest -v && ruff check .
+
+# Frontend
+cd frontend && npm run test && npm run build && npm run lint
 ```
 
-### Health Check
+## 10. Repository Structure
 
-`GET /health` on the backend returns `{"status": "ok"}` with HTTP 200. It requires no authentication and no external services. The frontend shell calls this endpoint on load and displays `Connected`, `Checking backend…`, or `Backend unavailable` depending on the result.
+```text
+ai-engineering-workbench/
+├── README.md, ARCHITECTURE.md, AI_USAGE.md, CONTRIBUTING.md
+├── .env.example, docker-compose.yml
+│
+├── backend/            # FastAPI app — see backend/README.md
+│   ├── app/            # models, schemas, services, repositories, api/routes, ai/
+│   └── tests/          # pytest suite (174 tests as of Phase 12)
+│
+├── frontend/           # React + TypeScript app
+│   └── src/
+│       ├── screens/    # Dashboard, Requirement, Plan, Tasks, AI Runs, Artifacts, Validation, Scenarios, Final Report
+│       ├── hooks/       # useProjectData, workflowStage
+│       ├── api/         # typed fetch clients
+│       └── components/  # AppShell + shared pieces
+│
+├── generated/          # Sandboxed workspace for AI-generated artifacts (never written to outside this)
+│
+└── docs/
+    ├── adr/             # Architecture Decision Records (ADR-001..006)
+    ├── scenarios/       # greenfield.md, brownfield.md, ambiguous.md
+    ├── validation/       # per-phase security reviews, performance evidence, validation strategy
+    ├── security.md, performance.md            # Phase 12 consolidated review
+    ├── FINAL_ENGINEERING_REPORT.md            # Phase 13
+    ├── REQUIREMENT_TRACEABILITY.md            # Phase 13
+    └── DEMO_GUIDE.md                          # Phase 13
+```
 
-### Requirement Analyzer
+## 11. AI-Assisted Development
 
-The frontend now includes a Requirement Analyzer form (textarea + "Analyze Requirement") below the health status. It calls `POST /api/v1/requirements`, then `POST /api/v1/requirements/{id}/analyze`, and displays the structured result — summary, functional/non-functional requirements, ambiguities, assumptions, constraints, success criteria, and engineering concerns, with ambiguities and assumptions visually distinguished. See [docs/api-design.md](docs/api-design.md) for the full API contract.
+AI is used task-by-task, never as a whole-system generator. Every meaningful AI interaction — what was asked, what came back, what the engineer found wrong, how it was corrected, how it was validated — is logged in [AI_USAGE.md](AI_USAGE.md), including the mistakes, not just the successes.
 
-Analysis requires a configured AI provider (`AI_PROVIDER=anthropic` and `AI_API_KEY` in `.env` — see [.env.example](.env.example)); without one, `/analyze` returns a clean `503` rather than failing silently. Requirement creation and retrieval work with no AI provider configured.
+## 12. Validation
 
-### Task Decomposition
+Nothing is claimed as tested unless it was actually executed. `NOT VALIDATED` is used literally, throughout every phase's documentation, whenever something wasn't run — see [docs/FINAL_ENGINEERING_REPORT.md](docs/FINAL_ENGINEERING_REPORT.md) for the consolidated list.
 
-After a requirement is analyzed, the frontend shows a "Generate Engineering Plan" button. It calls `POST /api/v1/requirements/{id}/tasks` and displays either the resulting plan — each task's title, description, requirement traceability, dependencies, acceptance criteria, and expected AI-assistance type, with inline Accept / Modify / Reject controls (`POST /api/v1/tasks/{task_id}/decision`) — or, if the analysis has an unresolved `HIGH`-impact ambiguity, a **"PLAN BLOCKED"** message naming the ambiguity that must be clarified first. See [docs/api-design.md](docs/api-design.md) for the full endpoint set and the ambiguity-gate rule.
+## 13. Git Workflow
 
-### AI-Assisted Task Execution
+Development proceeds through small, phase-scoped commits. Work is reviewed and validated before a commit is suggested; commits are never made automatically — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Once a task is `APPROVED` (accepted in plan review), its card shows an **AI Assistance** section: pick an assistance type (`CODE_GENERATION`, `DEBUGGING`, etc.), optionally add instructions, and "Request AI Assistance" (`POST /api/v1/tasks/{id}/ai-assist`). The resulting recommendation — summary, approach, files, tests, risks, confidence — is displayed with an **⚠ ENGINEERING REVIEW REQUIRED** banner whenever confidence isn't `HIGH`, and Accept / Modify / Reject controls (`POST /api/v1/ai-runs/{ai_run_id}/decision`). Choosing Modify opens a "What should be changed?" box; the next AI request for that task is automatically linked to the one it's revising (`AI-RUN-001 → MODIFY → AI-RUN-002`, both kept — never overwritten). A task's full AI Run History is listed on its card.
+## 14. Current Status
 
-### Artifact Generation
-
-Once an AI run's recommendation has been `ACCEPT`ed, its card shows a **"Generate Artifacts"** button (`POST /api/v1/ai-runs/{ai_run_id}/artifacts`) — a rejected or still-pending recommendation never shows this option, since generation is only reachable after `ACCEPT`. Each resulting artifact — real proposed file content, not just a description — is shown as a card (type, path, version, status) with a Show Diff/Content toggle and Accept/Reject controls (`POST /api/v1/artifacts/{artifact_id}/decision`). Regenerating creates a new version that supersedes the prior one — both are kept, visible via `GET /api/v1/tasks/{id}/artifacts`. **Every write is contained to the sandboxed `generated/` workspace** — an unsafe path (absolute, `..`, or anything resolving outside it) is rejected before anything is written; see [docs/api-design.md](docs/api-design.md) "Controlled File Writes".
-
-### Validation Engine
-
-Once an artifact is `APPROVED`, its card shows a **Validation** dashboard: seven checks (Unit Tests, Integration, API Contract, Static Analysis, Security, Performance, Build) as clickable pills — ✓ passed, ✗ failed, ⚠ not validated, ○ not yet run. Clicking one runs it for real (`POST /api/v1/artifacts/{id}/validate`) and expands to show the actual command and evidence (e.g. the real `pytest`/`ruff` output tail). The API only ever accepts a `validation_type` from a fixed set — never a raw command — see [docs/validation/validation-strategy.md](docs/validation/validation-strategy.md) for exactly what each type runs and its documented limits.
-
-## 14. URL Shortener (Mandatory Use Case)
-
-The mandatory assignment requirement — "Build a scalable URL shortener service with APIs, persistence, and analytics." — is implemented at `POST /api/v1/urls`, `GET /{short_code}`, `GET /api/v1/urls/{short_code}/analytics`. See [docs/api-design-url-shortener.md](docs/api-design-url-shortener.md) for its own API contract, distinct from the workbench's own meta-API above.
-
-**Built through the workbench, not alongside it**: its requirement was registered and analyzed via the Requirement Analyzer, decomposed into tasks via the Task Decomposer, and its create-URL task was routed through AI-assist → engineer review → artifact generation → artifact review → real validation — the same pipeline documented in sections 11–13 above, exercised on this feature specifically. `backend/tests/test_url_shortener_workbench_flow.py` is a permanent, re-runnable proof of that chain, not a one-time manual demo.
-
-Key engineering decisions: random Base62 short codes with DB-enforced collision retry ([ADR-002](docs/adr/ADR-002-short-code-strategy.md)), no cache for now — a documented decision tied to the still-unresolved AMB-001 traffic ambiguity, not an oversight ([ADR-003](docs/adr/ADR-003-cache-strategy.md)), and minimal click-count + timestamp analytics — no per-click event log, no PII ([ADR-004](docs/adr/ADR-004-analytics-design.md)). Real (not invented) latency numbers are in [docs/validation/url-shortener-performance.md](docs/validation/url-shortener-performance.md); the security review (URL validation, SSRF-adjacent blocking, the open rate-limiting gap) is in [docs/validation/PHASE-8-SECURITY-REVIEW.md](docs/validation/PHASE-8-SECURITY-REVIEW.md).
-
-## 16. Ambiguous Requirement — Engineer-Resolved (Phase 10)
-
-> Improve the analytics.
-
-Registered and analyzed through the real Requirement Analyzer, which correctly flagged this as materially ambiguous (`HIGH`-impact `AMB-001` — no analytics system or desired improvement is named). Attempting task decomposition on it was **actually blocked** — `plan.status == "BLOCKED"`, 0 tasks generated — not silently guessed. Three interpretations (Reporting / Real-Time / Advanced User Analytics) were presented with trade-offs; **the engineer chose Interpretation C**. Only then was it implemented: `GET /api/v1/urls/{short_code}/analytics/advanced` (device/browser/referrer breakdown, repeat-visitor detection), with hashed — never raw — IP storage and an honest `geographic_status` rather than fabricated location data, since choosing the more data-invasive interpretation directly reopened [ADR-004](docs/adr/ADR-004-analytics-design.md)'s privacy-by-minimalism reasoning. See [ADR-005](docs/adr/ADR-005-advanced-analytics-privacy.md).
-
-## 15. Current Status
-
-**Phase 10 — Ambiguous Requirement, Engineer-Resolved**
-
-The workbench demonstrated refusing to guess: a materially ambiguous requirement was blocked by the Task Decomposer's own gate until an explicit engineer decision resolved it, then implemented with a fresh privacy review specific to that choice — not a rubber-stamped continuation of Phase 8's original analytics scope. See [AI_USAGE.md](AI_USAGE.md) TASK-008 for the full engineering summary. Phase 9's brownfield optimization (redirect performance, a real regression found and fixed) remains documented in [docs/scenarios/brownfield.md](docs/scenarios/brownfield.md) and [AI_USAGE.md](AI_USAGE.md) TASK-007.
+**Phases 1–12 complete.** Phases 1–10 built the workbench and the URL shortener (greenfield, brownfield, and ambiguous scenarios). Phase 11 built the end-to-end UI (9 screens, `AppShell`, Vitest/RTL test suite). Phase 12 performed a security review (14 areas — see [docs/security.md](docs/security.md)) and a performance review including a genuine concurrent-load test that closed a previously `NOT VALIDATED` gap (see [docs/performance.md](docs/performance.md)). Phase 13 (this documentation pass) and Phase 14 (final end-to-end validation) close out the project — see [docs/FINAL_ENGINEERING_REPORT.md](docs/FINAL_ENGINEERING_REPORT.md) for the full account, including what remains `NOT VALIDATED`.
