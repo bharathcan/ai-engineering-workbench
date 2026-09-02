@@ -67,41 +67,45 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      <header className="app-shell__header">
-        <div className="app-shell__brand">AI Engineering Workbench</div>
-        <label className="app-shell__project-selector">
-          Project:
-          <select
-            value={selectedId ?? ''}
-            onChange={(e) => setSelectedId(e.target.value || null)}
-          >
-            <option value="">— Select a project —</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.id} — {p.text.slice(0, 60)}
-                {p.text.length > 60 ? '…' : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-        {projectsError && <span className="app-shell__error">{projectsError}</span>}
-      </header>
+      {selectedId && (
+        <>
+          <header className="app-shell__header">
+            <div className="app-shell__brand">AI Engineering Workbench</div>
+            <label className="app-shell__project-selector">
+              Project:
+              <select
+                value={selectedId ?? ''}
+                onChange={(e) => setSelectedId(e.target.value || null)}
+              >
+                <option value="">— Select a project —</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.id} — {p.text.slice(0, 60)}
+                    {p.text.length > 60 ? '…' : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {projectsError && <span className="app-shell__error">{projectsError}</span>}
+          </header>
 
-      <nav className="app-shell__nav" aria-label="Workbench navigation">
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={
-              'app-shell__nav-item' +
-              (activeScreen === item.id ? ' app-shell__nav-item--active' : '')
-            }
-            onClick={() => navigateTo(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
+          <nav className="app-shell__nav" aria-label="Workbench navigation">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={
+                  'app-shell__nav-item' +
+                  (activeScreen === item.id ? ' app-shell__nav-item--active' : '')
+                }
+                onClick={() => navigateTo(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </>
+      )}
 
       <main className="app-shell__content">
         {loading && <p className="app-shell__loading">Loading project…</p>}

@@ -1,7 +1,7 @@
-import './DashboardScreen.css'
 import type { ScreenId } from '../components/AppShell'
 import { flattenAiRuns, flattenArtifacts, flattenValidations, type ProjectData } from '../hooks/useProjectData'
 import { computeWorkflowStage } from '../hooks/workflowStage'
+import { ProjectNetwork } from '../components/ProjectNetwork'
 import { StageFlow } from './StageFlow'
 import { TalpLanding } from './TalpLanding'
 
@@ -19,117 +19,6 @@ export function DashboardScreen({
   return <DashboardProject project={project} />
 }
 
-function DashboardLanding({ onNavigate }: { onNavigate: (screen: ScreenId) => void }) {
-  return (
-    <div className="dashboard-landing">
-      {/* Hero Section */}
-      <div className="hero">
-        <div className="hero__content">
-          <div className="hero__badge">🚀 AI-Powered Engineering</div>
-          <h1 className="hero__title">
-            Transform Requirements
-            <br />
-            Into Production Code
-          </h1>
-          <p className="hero__subtitle">
-            AI-assisted development where you stay in control. Get structured task breakdowns,
-            intelligent recommendations, generated artifacts, and rigorous validation—all in one platform.
-          </p>
-          <button className="hero__cta" onClick={() => onNavigate('requirement')}>
-            Start Building
-          </button>
-        </div>
-        <div className="hero__visual">
-          <div className="hero__icon">⚡</div>
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <section className="features">
-        <h2 className="features__title">Why Engineering Teams Choose This</h2>
-        <div className="features__grid">
-          <Feature
-            icon="🎯"
-            title="Engineer-Led"
-            description="You make every decision. AI assists, you approve. Full audit trail."
-          />
-          <Feature
-            icon="🤖"
-            title="AI-Powered"
-            description="Analyze requirements, decompose tasks, generate code—all with AI help."
-          />
-          <Feature
-            icon="✅"
-            title="Validated"
-            description="7-stage validation pipeline ensures every artifact meets quality standards."
-          />
-          <Feature
-            icon="📊"
-            title="Transparent"
-            description="See exactly what AI generated, review all decisions, understand every step."
-          />
-        </div>
-      </section>
-
-      {/* Workflow Steps */}
-      <section className="workflow">
-        <h2 className="workflow__title">Your Workflow</h2>
-        <div className="workflow__steps">
-          <WorkflowStep
-            step={1}
-            title="Requirement"
-            description="Define what you want to build—vague or detailed"
-            icon="📝"
-          />
-          <div className="workflow__arrow">→</div>
-          <WorkflowStep
-            step={2}
-            title="Analysis"
-            description="AI identifies scope, ambiguities, constraints"
-            icon="🔍"
-          />
-          <div className="workflow__arrow">→</div>
-          <WorkflowStep
-            step={3}
-            title="Planning"
-            description="Tasks with dependencies and success criteria"
-            icon="📋"
-          />
-          <div className="workflow__arrow">→</div>
-          <WorkflowStep
-            step={4}
-            title="Execute"
-            description="Request AI assistance for each task"
-            icon="⚙️"
-          />
-          <div className="workflow__arrow">→</div>
-          <WorkflowStep
-            step={5}
-            title="Artifacts"
-            description="AI generates code, tests, documentation"
-            icon="📦"
-          />
-          <div className="workflow__arrow">→</div>
-          <WorkflowStep
-            step={6}
-            title="Validate"
-            description="Automated validation before approval"
-            icon="✔️"
-          />
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta-section">
-        <h2>Ready to transform your requirements?</h2>
-        <p>Select a project above or create a new one to get started</p>
-        <button className="cta-button" onClick={() => onNavigate('requirement')}>
-          Create New Project
-        </button>
-      </section>
-    </div>
-  )
-}
 
 function DashboardProject({ project }: { project: ProjectData }) {
   const { requirement, plan, artifactsByTaskId, validationsByArtifactId } = project
@@ -142,7 +31,6 @@ function DashboardProject({ project }: { project: ProjectData }) {
   const validations = flattenValidations(plan, artifactsByTaskId, validationsByArtifactId)
   const passed = validations.filter((v) => v.validation.status === 'PASSED').length
   const failed = validations.filter((v) => v.validation.status === 'FAILED').length
-  const notValidated = validations.filter((v) => v.validation.status === 'NOT_VALIDATED').length
 
   return (
     <div className="project-dashboard">
@@ -175,6 +63,9 @@ function DashboardProject({ project }: { project: ProjectData }) {
           </div>
         </div>
       )}
+
+      {/* Project Network Visualization */}
+      <ProjectNetwork tasks={plan?.tasks} />
 
       {/* Metrics Grid */}
       <div className="metrics-section">
@@ -221,26 +112,6 @@ function DashboardProject({ project }: { project: ProjectData }) {
   )
 }
 
-function Feature({ icon, title, description }: { icon: string; title: string; description: string }) {
-  return (
-    <div className="feature-card">
-      <div className="feature-card__icon">{icon}</div>
-      <h3 className="feature-card__title">{title}</h3>
-      <p className="feature-card__description">{description}</p>
-    </div>
-  )
-}
-
-function WorkflowStep({ step, title, description, icon }: { step: number; title: string; description: string; icon: string }) {
-  return (
-    <div className="workflow-item">
-      <div className="workflow-item__number">{step}</div>
-      <div className="workflow-item__icon">{icon}</div>
-      <h4 className="workflow-item__title">{title}</h4>
-      <p className="workflow-item__description">{description}</p>
-    </div>
-  )
-}
 
 function MetricCard({
   label,

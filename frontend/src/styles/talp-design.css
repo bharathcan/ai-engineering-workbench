@@ -1,13 +1,13 @@
 /* Talp.ai Minimalist Design System - Light, Bold, Animated */
 
 :root {
-  --color-bg: #ffffff;
-  --color-bg-secondary: #f8f9fa;
+  --color-bg: #f5f7fa;
+  --color-bg-secondary: #eef1f7;
   --color-accent: #2563eb;
   --color-accent-light: #3b82f6;
-  --color-text: #000000;
-  --color-text-secondary: #666666;
-  --color-border: #e5e7eb;
+  --color-text: #0f172a;
+  --color-text-secondary: #6b7280;
+  --color-border: #d1d5db;
   --radius: 12px;
 }
 
@@ -131,6 +131,16 @@ canvas {
   animation: fadeInUp 0.8s ease-out;
 }
 
+.hero__category {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -188,12 +198,27 @@ canvas {
   background: var(--color-bg-secondary);
 }
 
+.features__category {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  display: block;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
 .features__title {
   font-size: 2.5rem;
   font-weight: 900;
   text-align: center;
   margin-bottom: 4rem;
   letter-spacing: -1px;
+}
+
+.features__accent {
+  color: var(--color-accent);
 }
 
 .features__grid {
@@ -234,12 +259,27 @@ canvas {
   margin: 0 auto;
 }
 
+.workflow__category {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  display: block;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
 .workflow__title {
   font-size: 2.5rem;
   font-weight: 900;
   text-align: center;
   margin-bottom: 4rem;
   letter-spacing: -1px;
+}
+
+.workflow__accent {
+  color: var(--color-accent);
 }
 
 .workflow__steps {
@@ -295,11 +335,25 @@ canvas {
   text-align: center;
 }
 
+.cta__category {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
 .cta__title {
   font-size: 2.5rem;
   font-weight: 900;
   margin-bottom: 1rem;
   letter-spacing: -1px;
+}
+
+.cta__accent {
+  color: rgba(255, 255, 255, 1);
 }
 
 .cta__subtitle {
@@ -324,6 +378,18 @@ canvas {
 .cta__button:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Project Network */
+
+.project-network {
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 2rem;
 }
 
 /* Dashboard */
