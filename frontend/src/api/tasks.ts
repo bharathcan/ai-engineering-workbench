@@ -101,11 +101,10 @@ async function parseErrorDetail(response: Response): Promise<string> {
 }
 
 export async function generatePlan(requirementId: string): Promise<EngineeringPlan> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/engineering-plans`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ requirement_id: requirementId }),
-  })
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/requirements/${requirementId}/tasks`,
+    { method: 'POST' },
+  )
   if (!response.ok) {
     throw new RequirementApiError(await parseErrorDetail(response), response.status)
   }
@@ -113,7 +112,7 @@ export async function generatePlan(requirementId: string): Promise<EngineeringPl
 }
 
 export async function getPlan(requirementId: string): Promise<EngineeringPlan> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/engineering-plans/${requirementId}`)
+  const response = await fetch(`${API_BASE_URL}/api/v1/requirements/${requirementId}/tasks`)
   if (!response.ok) {
     throw new RequirementApiError(await parseErrorDetail(response), response.status)
   }
