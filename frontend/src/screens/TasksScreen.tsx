@@ -9,6 +9,8 @@ import {
   type EngineeringTask,
 } from '../api/tasks'
 import '../components/EngineeringPlanPanel.css'
+import '../components/TasksGrid.css'
+import { TasksGrid } from '../components/TasksGrid'
 import type { ProjectData } from '../hooks/useProjectData'
 
 const ASSISTANCE_TYPES: AIAssistRequestType[] = [
@@ -57,28 +59,20 @@ export function TasksScreen({
   return (
     <section className="screen">
       <h2>Task Execution</h2>
-      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0, minWidth: '220px' }}>
-          {tasks.map((t) => (
-            <li key={t.id} style={{ marginBottom: '0.35rem' }}>
-              <button
-                type="button"
-                className="link-button"
-                style={{
-                  textDecoration: t.id === selectedTask?.id ? 'none' : 'underline',
-                  fontWeight: t.id === selectedTask?.id ? 700 : 400,
-                }}
-                onClick={() => setSelectedTaskId(t.id)}
-              >
-                {t.sequence}. {t.title}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {selectedTask && <TaskDetail key={selectedTask.id} task={selectedTask} onChanged={onChanged} />}
-        </div>
+      <TasksGrid
+        tasks={tasks}
+        selectedTaskId={selectedTaskId}
+        onSelectTask={setSelectedTaskId}
+      />
+      <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e5e7eb' }}>
+        {selectedTask ? (
+          <>
+            <h3 style={{ marginBottom: '1.5rem' }}>Task Details</h3>
+            <TaskDetail key={selectedTask.id} task={selectedTask} onChanged={onChanged} />
+          </>
+        ) : (
+          <p style={{ color: '#6b7280', fontStyle: 'italic' }}>Select a task to view details</p>
+        )}
       </div>
     </section>
   )

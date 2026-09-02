@@ -1,0 +1,131 @@
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.task-card-grid {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.task-card-grid:hover {
+  border-color: #4b4dff;
+  box-shadow: 0 4px 12px rgba(75, 77, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.task-card-grid--selected {
+  border-color: #4b4dff;
+  background: rgba(75, 77, 255, 0.02);
+  box-shadow: 0 4px 16px rgba(75, 77, 255, 0.2);
+}
+
+.task-card-grid__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.task-card-grid__id {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111111;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.task-card-grid__status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.task-card-grid__status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.task-card-grid__status--review_required {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.task-card-grid__status--approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.task-card-grid__status--accept {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.task-card-grid__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  color: #111111;
+  line-height: 1.4;
+}
+
+.task-card-grid__type {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b4dff;
+  background: rgba(75, 77, 255, 0.08);
+  padding: 0.3rem 0.6rem;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.task-card-grid__meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: #8c8a84;
+}
+
+.task-card-grid__priority {
+  font-weight: 600;
+}
+
+.task-card-grid__status-value {
+  padding: 0.2rem 0.5rem;
+  background: #f3f4f6;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.task-card-grid__footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.task-card-grid__dependency {
+  font-size: 0.8rem;
+  color: #6b7280;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

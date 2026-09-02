@@ -109,7 +109,7 @@ export function RequirementScreen({
           </p>
 
           {!project.requirement.latest_analysis && (
-            <button type="button" onClick={handleAnalyze} disabled={working}>
+            <button type="button" className="analyzer__button analyzer__button--primary" onClick={handleAnalyze} disabled={working}>
               {working ? 'Analyzing…' : 'Analyze Requirement'}
             </button>
           )}
