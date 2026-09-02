@@ -10,6 +10,7 @@ import {
 } from '../api/tasks'
 import '../components/EngineeringPlanPanel.css'
 import '../components/TasksGrid.css'
+import '../components/TaskDetail.css'
 import { TasksGrid } from '../components/TasksGrid'
 import type { ProjectData } from '../hooks/useProjectData'
 
@@ -107,52 +108,95 @@ function TaskDetail({ task, onChanged }: { task: EngineeringTask; onChanged: () 
   }
 
   return (
-    <article className="task-card">
-      <header className="task-card__header">
-        <strong>{task.id}</strong>
-        <span className="task-card__type">{task.type}</span>
-      </header>
-      <h3>{task.title}</h3>
-      <p>{task.description}</p>
+    <article className="task-detail">
+      <div className="task-detail__header">
+        <div>
+          <span className="task-detail__id">{task.id}</span>
+        </div>
+        <div className="task-detail__badges">
+          <span className="task-detail__badge task-detail__badge--type">{task.type}</span>
+          <span className={`task-detail__badge task-detail__badge--status`}>
+            {task.review_status}
+          </span>
+        </div>
+      </div>
 
-      <p className="task-card__meta">
-        <strong>Requirement:</strong> {task.requirement_refs.join(', ') || 'None'}
-      </p>
-      <p className="task-card__meta">
-        <strong>Dependencies:</strong> {task.dependencies.join(', ') || 'None'}
-      </p>
-      <p className="task-card__meta">
-        <strong>AI Assistance type:</strong> {task.ai_assistance_type}
-      </p>
+      <h2 className="task-detail__title">{task.title}</h2>
+      <div className="task-detail__description">{task.description}</div>
 
-      <div className="task-card__criteria">
-        <strong>Acceptance Criteria / Definition of Done:</strong>
-        <ul>
+      <div className="task-detail__meta-grid">
+        <div className="task-detail__meta">
+          <span className="task-detail__meta-label">Status</span>
+          <span className="task-detail__meta-value">{task.status}</span>
+        </div>
+        <div className="task-detail__meta">
+          <span className="task-detail__meta-label">AI Type</span>
+          <span className="task-detail__meta-value">{task.ai_assistance_type}</span>
+        </div>
+        <div className="task-detail__meta">
+          <span className="task-detail__meta-label">Priority</span>
+          <span className="task-detail__meta-value"><strong>#{task.sequence}</strong></span>
+        </div>
+      </div>
+
+      {(task.requirement_refs.length > 0 || task.dependencies.length > 0) && (
+        <div className="task-detail__section">
+          <span className="task-detail__section-title">Dependencies & References</span>
+          <div className="task-detail__meta-grid">
+            {task.requirement_refs.length > 0 && (
+              <div className="task-detail__meta">
+                <span className="task-detail__meta-label">Requirements</span>
+                <span className="task-detail__meta-value">
+                  {task.requirement_refs.map((r, i) => (
+                    <span key={i}>
+                      <strong>{r}</strong>
+                      {i < task.requirement_refs.length - 1 ? ', ' : ''}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            )}
+            {task.dependencies.length > 0 && (
+              <div className="task-detail__meta">
+                <span className="task-detail__meta-label">Blocked By</span>
+                <span className="task-detail__meta-value">
+                  {task.dependencies.map((d, i) => (
+                    <span key={i}>
+                      <strong>{d}</strong>
+                      {i < task.dependencies.length - 1 ? ', ' : ''}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="task-detail__section">
+        <span className="task-detail__section-title">Acceptance Criteria</span>
+        <ul className="task-detail__list">
           {task.acceptance_criteria.map((c, i) => (
-            <li key={i}>☐ {c}</li>
+            <li key={i} className="task-detail__list-item" data-number={i + 1}>
+              {c}
+            </li>
           ))}
         </ul>
       </div>
 
       {task.risks.length > 0 && (
-        <div className="task-card__criteria">
-          <strong>Risks:</strong>
-          <ul>
+        <div className="task-detail__section">
+          <span className="task-detail__section-title">Risks & Mitigations</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {task.risks.map((r) => (
-              <li key={r.id}>
-                [{r.impact}] {r.description}
-              </li>
+              <div key={r.id} className="task-detail__risk">
+                <span className="task-detail__risk-impact">[{r.impact}]</span>
+                {r.description}
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
-
-      <div className="task-card__review">
-        <strong>Engineer Review:</strong>{' '}
-        <span className={`review-status review-status--${task.review_status.toLowerCase()}`}>
-          {task.review_status} ({task.status})
-        </span>
-      </div>
 
       {!alreadyDecided && (
         <p className="badge badge--ai" style={{ marginTop: '0.5rem' }}>
