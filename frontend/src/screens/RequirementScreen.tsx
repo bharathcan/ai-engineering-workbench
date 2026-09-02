@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import '../components/RequirementAnalyzer.css'
+import '../components/AnalysisResult.css'
 import {
   analyzeRequirement,
   clarifyRequirement,
@@ -182,111 +183,117 @@ export function RequirementScreen({
 
 function AnalysisResult({ result }: { result: RequirementAnalysisResult }) {
   return (
-    <div className="analysis-result">
+    <div className="analysis">
       <p className="badge badge--ai">AI-suggested analysis — not yet an engineering decision</p>
 
-      <ResultBlock title="Summary">
-        <p>{result.summary}</p>
-      </ResultBlock>
+      <div className="analysis__summary">{result.summary}</div>
 
-      <ResultBlock title="Functional Requirements">
-        <IdList items={result.functional_requirements} />
-      </ResultBlock>
+      <AnalysisSection title="Functional Requirements" count={result.functional_requirements.length}>
+        <IdGrid items={result.functional_requirements} />
+      </AnalysisSection>
 
-      <ResultBlock title="Non-Functional Requirements">
-        <IdList items={result.non_functional_requirements} />
-      </ResultBlock>
+      <AnalysisSection title="Non-Functional Requirements" count={result.non_functional_requirements.length}>
+        <IdGrid items={result.non_functional_requirements} />
+      </AnalysisSection>
 
-      <ResultBlock title="Ambiguities" tone="ambiguity">
+      <AnalysisSection title="Ambiguities" count={result.ambiguities.length} tone="ambiguity">
         {result.ambiguities.length === 0 ? (
-          <p className="analysis-result__empty">None identified.</p>
+          <p className="analysis-empty">None identified.</p>
         ) : (
-          <ul className="analysis-result__list">
+          <div className="detail-cards">
             {result.ambiguities.map((item) => (
-              <li key={item.id} className="analysis-result__card analysis-result__card--ambiguity">
-                <div className="analysis-result__card-header">
-                  <strong>{item.id}</strong>
-                  <span className={`impact-badge impact-badge--${item.impact.toLowerCase()}`}>
+              <div key={item.id} className="detail-card detail-card--ambiguity">
+                <div className="detail-card__header">
+                  <span className="detail-card__id">{item.id}</span>
+                  <span className={`impact-pill impact-pill--${item.impact.toLowerCase()}`}>
                     {item.impact}
                   </span>
                 </div>
-                <p>{item.description}</p>
-                <p className="analysis-result__meta">
+                <p className="detail-card__description">{item.description}</p>
+                <p className="detail-card__meta">
                   <strong>Why it matters:</strong> {item.why_it_matters}
                 </p>
-                <p className="analysis-result__meta">
+                <p className="detail-card__meta">
                   <strong>Information needed:</strong> {item.information_needed}
                 </p>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
-      </ResultBlock>
+      </AnalysisSection>
 
-      <ResultBlock title="Assumptions" tone="assumption">
+      <AnalysisSection title="Assumptions" count={result.assumptions.length} tone="assumption">
         {result.assumptions.length === 0 ? (
-          <p className="analysis-result__empty">None made.</p>
+          <p className="analysis-empty">None made.</p>
         ) : (
-          <ul className="analysis-result__list">
+          <div className="detail-cards">
             {result.assumptions.map((item) => (
-              <li key={item.id} className="analysis-result__card analysis-result__card--assumption">
-                <strong>{item.id}</strong>
-                <p>{item.description}</p>
-                <p className="analysis-result__meta">
+              <div key={item.id} className="detail-card detail-card--assumption">
+                <div className="detail-card__header">
+                  <span className="detail-card__id">{item.id}</span>
+                </div>
+                <p className="detail-card__description">{item.description}</p>
+                <p className="detail-card__meta">
                   <strong>Reason:</strong> {item.reason}
                 </p>
-                <p className="analysis-result__meta">
+                <p className="detail-card__meta">
                   <strong>Impact if wrong:</strong> {item.impact}
                 </p>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
-      </ResultBlock>
+      </AnalysisSection>
 
-      <ResultBlock title="Constraints">
-        <IdList items={result.constraints} />
-      </ResultBlock>
+      <AnalysisSection title="Constraints" count={result.constraints.length}>
+        <IdGrid items={result.constraints} />
+      </AnalysisSection>
 
-      <ResultBlock title="Success Criteria">
-        <IdList items={result.success_criteria} />
-      </ResultBlock>
+      <AnalysisSection title="Success Criteria" count={result.success_criteria.length} tone="success">
+        <IdGrid items={result.success_criteria} />
+      </AnalysisSection>
 
-      <ResultBlock title="Engineering Concerns">
-        <IdList items={result.engineering_concerns} />
-      </ResultBlock>
+      <AnalysisSection title="Engineering Concerns" count={result.engineering_concerns.length} tone="engineering">
+        <IdGrid items={result.engineering_concerns} />
+      </AnalysisSection>
     </div>
   )
 }
 
-function ResultBlock({
+function AnalysisSection({
   title,
+  count,
   tone,
   children,
 }: {
   title: string
-  tone?: 'ambiguity' | 'assumption'
+  count: number
+  tone?: 'ambiguity' | 'assumption' | 'success' | 'engineering'
   children: ReactNode
 }) {
   return (
-    <div className={`result-block${tone ? ` result-block--${tone}` : ''}`}>
-      <h4>{title}</h4>
+    <div className={`analysis-section${tone ? ` analysis-section--${tone}` : ''}`}>
+      <div className="analysis-section__header">
+        <span className="analysis-section__title">{title}</span>
+        <span className="analysis-section__count">{count}</span>
+      </div>
       {children}
     </div>
   )
 }
 
-function IdList({ items }: { items: { id: string; description: string }[] }) {
+function IdGrid({ items }: { items: { id: string; description: string }[] }) {
   if (items.length === 0) {
-    return <p className="analysis-result__empty">None identified.</p>
+    return <p className="analysis-empty">None identified.</p>
   }
   return (
-    <ul className="analysis-result__list">
+    <div className="id-grid">
       {items.map((item) => (
-        <li key={item.id} className="analysis-result__card">
-          <strong>{item.id}</strong> — {item.description}
-        </li>
+        <div key={item.id} className="id-card">
+          <span className="id-card__id">{item.id}</span>
+          <span>{item.description}</span>
+        </div>
       ))}
-    </ul>
+    </div>
   )
 }

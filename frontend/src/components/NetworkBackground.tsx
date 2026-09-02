@@ -36,7 +36,7 @@ export function NetworkBackground() {
 
     const animate = () => {
       // Clear canvas
-      ctx.fillStyle = '#f5e6d3'
+      ctx.fillStyle = '#e3e2df'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       // Update and draw particles

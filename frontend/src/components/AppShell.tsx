@@ -70,7 +70,13 @@ export function AppShell() {
       {selectedId && (
         <>
           <header className="app-shell__header">
-            <div className="app-shell__brand">AI Engineering Workbench</div>
+            <button
+              type="button"
+              className="app-shell__brand app-shell__brand--button"
+              onClick={() => navigateTo('dashboard')}
+            >
+              AI Engineering Workbench
+            </button>
             <label className="app-shell__project-selector">
               Project:
               <select
@@ -112,7 +118,14 @@ export function AppShell() {
         {error && <p className="app-shell__error">{error}</p>}
 
         {activeScreen === 'dashboard' && (
-          <DashboardScreen project={data} onNavigate={navigateTo} />
+          <DashboardScreen
+            project={data}
+            onNavigate={navigateTo}
+            projects={projects}
+            projectsError={projectsError}
+            selectedProjectId={selectedId}
+            onProjectSelect={setSelectedId}
+          />
         )}
         {activeScreen === 'requirement' && (
           <RequirementScreen
