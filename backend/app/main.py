@@ -14,6 +14,7 @@ from app.api.routes.requirements import router as requirements_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.urls import router as urls_router
 from app.api.routes.validations import router as validations_router
+from app.core.config import settings
 from app.core.database import Base, engine
 
 logger = logging.getLogger(__name__)
@@ -35,12 +36,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Local frontend dev server origins. Not sourced from settings yet — this is
-# the application foundation only; a configurable CORS policy is deferred
-# until the frontend actually needs more than local development.
+# Defaults to the local Vite dev server; set CORS_ORIGINS (comma-separated)
+# for any deployed frontend origin — see app.core.config.Settings.cors_origins.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=settings.cors_origin_list,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { RequirementApiError } from '../api/requirements'
 import {
   decideTask,
+  decideAiRun,
+  generateArtifacts,
   requestAiAssist,
   type AIAssistRequestType,
   type EngineeringTask,
@@ -250,6 +252,32 @@ function AIAssistanceSection({
     }
   }
 
+  const submitDecision = async (runId: string, decision: 'ACCEPT' | 'MODIFY' | 'REJECT') => {
+    setRequesting(true)
+    setError(null)
+    try {
+      await decideAiRun(runId, decision)
+      onChanged()
+    } catch (err) {
+      setError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
+    } finally {
+      setRequesting(false)
+    }
+  }
+
+  const generateAndNotify = async (runId: string) => {
+    setRequesting(true)
+    setError(null)
+    try {
+      await generateArtifacts(runId)
+      onChanged()
+    } catch (err) {
+      setError(err instanceof RequirementApiError ? err.message : 'Failed to generate artifacts.')
+    } finally {
+      setRequesting(false)
+    }
+  }
+
   return (
     <div className="ai-assist">
       <h5>AI Assistance ({task.ai_runs.length} run(s) so far)</h5>
@@ -257,6 +285,44 @@ function AIAssistanceSection({
         Full run history, prompts, and responses are on the AI Runs screen. Generated artifacts
         are on the Artifacts screen.
       </p>
+
+      {task.ai_runs.length > 0 && (
+        <div className="ai-assist__runs" style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e5e7eb' }}>
+          {task.ai_runs.map((run) => (
+            <div key={run.id} className="ai-run-card" style={{ marginBottom: '1rem', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: '#f9fafb' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <strong>{run.id}</strong>
+                <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{run.assistance_type}</span>
+                <span style={{ fontSize: '0.85rem', color: '#059669' }}>Confidence: {run.response?.confidence || 'N/A'}</span>
+              </div>
+              {run.response?.summary && <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>{run.response.summary}</p>}
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem' }}>Status: {run.status}</p>
+              {!run.decisions || run.decisions.length === 0 ? (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem' }} disabled={requesting} onClick={() => submitDecision(run.id, 'ACCEPT')}>
+                    Accept
+                  </button>
+                  <button type="button" style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem' }} disabled={requesting} onClick={() => submitDecision(run.id, 'MODIFY')}>
+                    Modify
+                  </button>
+                  <button type="button" style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem' }} disabled={requesting} onClick={() => submitDecision(run.id, 'REJECT')}>
+                    Reject
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0 }}>Decision: {run.decisions[run.decisions.length - 1].decision}</p>
+                  {run.decisions[run.decisions.length - 1].decision === 'ACCEPT' && (
+                    <button type="button" style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem' }} disabled={requesting} onClick={() => generateAndNotify(run.id)}>
+                      Generate Artifacts
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {error && <p className="ai-assist__error">{error}</p>}
 

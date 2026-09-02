@@ -17,6 +17,16 @@ class Settings(BaseSettings):
     database_url: str | None = None
     redis_url: str | None = None
 
+    # Comma-separated list of allowed frontend origins for CORS. Defaults to
+    # the local Vite dev server so `npm run dev` keeps working with zero
+    # config. Deployments (e.g. Render) with a real frontend origin must set
+    # this explicitly — see app.main's CORSMiddleware setup.
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
     ai_provider: str | None = None
     ai_api_key: str | None = None
     ai_model: str | None = None

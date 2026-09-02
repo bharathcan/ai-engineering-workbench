@@ -28,6 +28,20 @@ def list_requirements(db: Session) -> list[Requirement]:
         raise PersistenceError("Failed to list requirements.") from exc
 
 
+def append_clarification(db: Session, requirement: Requirement, clarifications: str) -> Requirement:
+    try:
+        requirement.text = (
+            f"{requirement.text}\n\nEngineer clarifications:\n{clarifications}"
+        )
+        db.add(requirement)
+        db.commit()
+        db.refresh(requirement)
+        return requirement
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise PersistenceError("Failed to save clarification.") from exc
+
+
 def get_requirement_by_public_id(db: Session, requirement_id: str) -> Requirement | None:
     numeric_id = _parse_public_id(requirement_id)
     if numeric_id is None:

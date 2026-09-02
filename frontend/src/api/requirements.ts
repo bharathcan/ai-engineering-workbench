@@ -101,6 +101,21 @@ export async function analyzeRequirement(requirementId: string): Promise<Require
   return response.json()
 }
 
+export async function clarifyRequirement(
+  requirementId: string,
+  clarifications: string,
+): Promise<RequirementResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/requirements/${requirementId}/clarify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clarifications }),
+  })
+  if (!response.ok) {
+    throw new RequirementApiError(await parseErrorDetail(response), response.status)
+  }
+  return response.json()
+}
+
 export async function getRequirement(requirementId: string): Promise<RequirementResponse> {
   const response = await fetch(`${API_BASE_URL}/api/v1/requirements/${requirementId}`)
   if (!response.ok) {

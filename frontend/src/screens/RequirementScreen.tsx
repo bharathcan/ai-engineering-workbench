@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import '../components/RequirementAnalyzer.css'
 import {
   analyzeRequirement,
+  clarifyRequirement,
   createRequirement,
   RequirementApiError,
   type RequirementAnalysisResult,
@@ -18,34 +19,53 @@ export function RequirementScreen({
   onAnalyzed: () => void
 }) {
   const [text, setText] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
+
+  const [working, setWorking] = useState(false)
+  const [workError, setWorkError] = useState<string | null>(null)
+  const [clarifications, setClarifications] = useState('')
 
   const handleCreate = async () => {
-    setSubmitting(true)
-    setError(null)
+    setCreating(true)
+    setCreateError(null)
     try {
       const created = await createRequirement(text)
       setText('')
       onRequirementCreated(created.id)
     } catch (err) {
-      setError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
+      setCreateError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
     } finally {
-      setSubmitting(false)
+      setCreating(false)
     }
   }
 
   const handleAnalyze = async () => {
     if (!project) return
-    setSubmitting(true)
-    setError(null)
+    setWorking(true)
+    setWorkError(null)
     try {
       await analyzeRequirement(project.requirement.id)
       onAnalyzed()
     } catch (err) {
-      setError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
+      setWorkError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
     } finally {
-      setSubmitting(false)
+      setWorking(false)
+    }
+  }
+
+  const handleClarify = async () => {
+    if (!project || clarifications.trim().length === 0) return
+    setWorking(true)
+    setWorkError(null)
+    try {
+      await clarifyRequirement(project.requirement.id, clarifications)
+      setClarifications('')
+      onAnalyzed()
+    } catch (err) {
+      setWorkError(err instanceof RequirementApiError ? err.message : 'Something went wrong.')
+    } finally {
+      setWorking(false)
     }
   }
 
@@ -65,17 +85,17 @@ export function RequirementScreen({
           onChange={(e) => setText(e.target.value)}
           placeholder="e.g. Build a scalable URL shortener service with APIs, persistence, and analytics."
           rows={4}
-          disabled={submitting}
+          disabled={creating}
         />
         <button
           type="button"
           className="analyzer__button"
           onClick={handleCreate}
-          disabled={submitting || text.trim().length === 0}
+          disabled={creating || text.trim().length === 0}
         >
-          {submitting ? 'Working…' : 'Create Requirement'}
+          {creating ? 'Working…' : 'Create Requirement'}
         </button>
-        {error && <p className="analyzer__error">{error}</p>}
+        {createError && <p className="analyzer__error">{createError}</p>}
       </div>
 
       {project && (
@@ -89,14 +109,45 @@ export function RequirementScreen({
           </p>
 
           {!project.requirement.latest_analysis && (
-            <button type="button" onClick={handleAnalyze} disabled={submitting}>
-              {submitting ? 'Analyzing…' : 'Analyze Requirement'}
+            <button type="button" onClick={handleAnalyze} disabled={working}>
+              {working ? 'Analyzing…' : 'Analyze Requirement'}
             </button>
           )}
 
           {project.requirement.latest_analysis && (
-            <AnalysisResult result={project.requirement.latest_analysis} />
+            <>
+              <AnalysisResult result={project.requirement.latest_analysis} />
+
+              {project.requirement.latest_analysis.ambiguities.some((a) => a.impact === 'HIGH') && (
+                <div className="screen-section">
+                  <h4>Resolve Ambiguities</h4>
+                  <p>
+                    One or more ambiguities above are HIGH impact, which blocks plan generation.
+                    Answer them here — this amends {project.requirement.id} in place and
+                    re-analyzes, rather than creating a new requirement.
+                  </p>
+                  <textarea
+                    className="analyzer__textarea"
+                    value={clarifications}
+                    onChange={(e) => setClarifications(e.target.value)}
+                    placeholder="e.g. AMB-001: track click count and referrer only. AMB-002: expect ~500 req/s."
+                    rows={3}
+                    disabled={working}
+                  />
+                  <button
+                    type="button"
+                    className="analyzer__button"
+                    onClick={handleClarify}
+                    disabled={working || clarifications.trim().length === 0}
+                  >
+                    {working ? 'Re-analyzing…' : 'Submit Clarification & Re-analyze'}
+                  </button>
+                </div>
+              )}
+            </>
           )}
+
+          {workError && <p className="analyzer__error">{workError}</p>}
         </div>
       )}
     </section>

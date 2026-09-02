@@ -3,6 +3,7 @@ from collections.abc import Callable
 from sqlalchemy.orm import Session
 
 from app.ai.base import AIProvider
+from app.ai.prompts import build_requirement_clarification_user_prompt
 from app.core.exceptions import RequirementNotFoundError
 from app.models.requirement import Requirement
 from app.repositories import requirement_repository
@@ -36,6 +37,49 @@ def analyze_requirement(
     result: RequirementAnalysisResult = analyzer.analyze(requirement.text)
 
     requirement_repository.save_analysis(db, requirement, result)
+    db.refresh(requirement)
+    return _to_response(requirement)
+
+
+def clarify_requirement(
+    db: Session,
+    requirement_id: str,
+    clarifications: str,
+    ai_provider_factory: Callable[[], AIProvider],
+) -> RequirementResponse:
+    """Amends the same requirement in place with engineer-supplied
+    clarifications, then re-analyzes. Safe to do in place (unlike a fresh
+    requirement) because this only ever runs before any plan/task chain has
+    been built on this requirement's analysis — see the ambiguity gate."""
+    requirement = _get_or_raise(db, requirement_id)
+    requirement = requirement_repository.append_clarification(db, requirement, clarifications)
+
+    analyzer = RequirementAnalyzer(ai_provider_factory())
+
+    # Get prior analysis to help AI preserve ID continuity during re-analysis
+    prior_analysis_text = ""
+    if requirement.analyses:
+        prior_analysis = requirement_repository.to_analysis_result(requirement.analyses[-1])
+        # Format prior analysis as structured text for AI to reference
+        prior_analysis_text = (
+            f"Summary: {prior_analysis.summary}\n"
+            f"Functional Requirements: {[f'{a.id}: {a.description}' for a in prior_analysis.functional_requirements]}\n"
+            f"Ambiguities: {[f'{a.id} ({a.impact}): {a.description}' for a in prior_analysis.ambiguities]}\n"
+            f"Constraints: {[f'{a.id}: {a.description}' for a in prior_analysis.constraints]}\n"
+            f"Success Criteria: {[f'{a.id}: {a.description}' for a in prior_analysis.success_criteria]}"
+        )
+
+    # Use clarification-specific prompt to help AI preserve structure
+    result: RequirementAnalysisResult = analyzer.analyze_with_context(
+        requirement.text, clarifications, prior_analysis_text
+    )
+
+    requirement_repository.save_analysis(db, requirement, result)
+
+    # Delete old plans to force regeneration with updated analysis
+    from app.repositories import engineering_plan_repository
+    engineering_plan_repository.delete_plans_by_requirement(db, requirement)
+
     db.refresh(requirement)
     return _to_response(requirement)
 

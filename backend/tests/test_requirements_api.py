@@ -149,3 +149,35 @@ def test_list_requirements_reflects_analysis_status(client):
     listed = next(r for r in response.json() if r["id"] == created["id"])
     assert listed["status"] == "ANALYZED"
     assert listed["latest_analysis"] is not None
+
+
+def test_clarify_amends_text_in_place_and_reanalyzes(client):
+    created = client.post("/api/v1/requirements", json={"text": "Improve the analytics."}).json()
+
+    _override_ai_provider(raw_payload=VALID_URL_SHORTENER_ANALYSIS)
+    response = client.post(
+        f"/api/v1/requirements/{created['id']}/clarify",
+        json={"clarifications": "Track click count and timestamp only."},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == created["id"]
+    assert "Improve the analytics." in body["text"]
+    assert "Track click count and timestamp only." in body["text"]
+    assert body["status"] == "ANALYZED"
+    assert body["latest_analysis"] is not None
+
+
+def test_clarify_unknown_requirement_returns_404(client):
+    response = client.post(
+        "/api/v1/requirements/REQ-999999/clarify", json={"clarifications": "x"}
+    )
+    assert response.status_code == 404
+
+
+def test_clarify_rejects_empty_clarifications(client):
+    created = client.post("/api/v1/requirements", json={"text": "Improve the analytics."}).json()
+    response = client.post(
+        f"/api/v1/requirements/{created['id']}/clarify", json={"clarifications": "   "}
+    )
+    assert response.status_code == 422

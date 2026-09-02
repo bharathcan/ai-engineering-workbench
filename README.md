@@ -2,6 +2,8 @@
 
 > AI-assisted software engineering workbench that transforms software requirements into structured, validated engineering artifacts with human-in-the-loop review — demonstrated end-to-end via the mandatory use case: **build a scalable URL shortener service with APIs, persistence, and analytics.**
 
+
+
 ---
 
 ## 1. Project
@@ -97,8 +99,9 @@ cp .env.example .env
 
 | Variable | Required? | Purpose |
 |---|---|---|
-| `DATABASE_URL` | No | Defaults to a local SQLite file. Set to a `postgresql+psycopg://...` URL to switch dialects (untested in this environment). |
+| `DATABASE_URL` | No | Defaults to a local SQLite file. Accepts a `postgres://`, `postgresql://`, or `postgresql+psycopg://` URL for Postgres — the first two are normalized to the installed psycopg3 driver automatically (`app/core/database.py`), so a managed provider's connection string (e.g. Render's) works unmodified. |
 | `REDIS_URL` | No | Unused — no code path reads it yet. |
+| `CORS_ORIGINS` | No | Comma-separated allowed frontend origins. Defaults to the local Vite dev server; set explicitly for any deployed frontend origin. |
 | `AI_PROVIDER` / `AI_API_KEY` / `AI_MODEL` | Only for `/analyze` and AI-assist endpoints | Without these, those endpoints return a clean `503`, not a silent failure. |
 | `VITE_API_BASE_URL` | No | Frontend's backend URL; defaults to `http://localhost:8000`. |
 | `IP_HASH_SALT` | No | Salts the URL-shortener's IP hash for repeat-visitor detection (ADR-005); a random salt is generated per process start if unset. |
@@ -138,6 +141,20 @@ Not used by any code path. `docker-compose.yml` defines it behind an opt-in `wit
 ### Docker / Docker Compose
 
 `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile` exist and describe the intended container setup (`docker compose up` for backend+frontend; `docker compose --profile with-db up` to add Postgres/Redis, unwired). **NOT VALIDATED** — Docker is not installed in this development environment, so these have never actually been built or run here.
+
+### Deploying to Render
+
+`render.yaml` at the repo root defines a Blueprint: the backend as a Docker web service (using `backend/Dockerfile`), the frontend as a static site, and a managed PostgreSQL database — this is the first deployment target where Postgres is actually exercised rather than just proposed (see §5).
+
+1. In the Render dashboard: **New → Blueprint**, connect this GitHub repo. Render reads `render.yaml` and proposes `workbench-db` (Postgres), `workbench-backend` (Docker web service), and `workbench-frontend` (static site).
+2. Before applying, note the exact names Render assigns each service (normally `workbench-backend`/`workbench-frontend` unless already taken) — the blueprint cross-references them (`CORS_ORIGINS` on the backend, `VITE_API_BASE_URL` on the frontend) assuming those exact names. If Render appends a suffix because the name is taken, update both env vars after the first deploy to match the real `.onrender.com` URLs, then redeploy.
+3. `AI_API_KEY` is deliberately **not** in `render.yaml` (`sync: false`) — set it manually on the backend service under **Environment**, using a workspace-scoped key (see §8 above for why an identity-linked "Personal" key won't work).
+4. `DATABASE_URL` is wired automatically from `workbench-db`'s connection string.
+
+**Known, disclosed limitations of this path — NOT VALIDATED in this environment:**
+* The Postgres code path (`_normalize_database_url` in `app/core/database.py`, and every query in the app) has never been run against a real Postgres instance here — only SQLite. This is the first time it would be exercised for real.
+* Render's exact current free-tier terms (database retention, instance spin-down behavior) were not verified live — check the dashboard at deploy time rather than trusting a remembered price/limit.
+* No CI/CD, staging environment, or rollback strategy beyond Render's own deploy history is set up.
 
 ### Running Tests
 

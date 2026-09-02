@@ -105,6 +105,16 @@ def get_latest_plan_by_requirement(
         raise PersistenceError("Failed to load engineering plan.") from exc
 
 
+def delete_plans_by_requirement(db: Session, requirement: Requirement) -> None:
+    """Delete all existing plans for a requirement to force regeneration after clarifications."""
+    try:
+        db.query(EngineeringPlan).filter(EngineeringPlan.requirement_id == requirement.id).delete()
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise PersistenceError("Failed to delete existing plans.") from exc
+
+
 def get_task_by_public_id(db: Session, task_id: str) -> EngineeringTask | None:
     numeric_id = _parse_task_public_id(task_id)
     if numeric_id is None:

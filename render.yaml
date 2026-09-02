@@ -1,0 +1,41 @@
+databases:
+  - name: workbench-db
+    plan: free
+    databaseName: workbench
+    user: workbench
+
+services:
+  - type: web
+    name: workbench-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: workbench-db
+          property: connectionString
+      - key: AI_PROVIDER
+        value: anthropic
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: claude-sonnet-4-5-20250929
+      - key: CORS_ORIGINS
+        value: https://workbench-frontend.onrender.com
+
+  - type: web
+    name: workbench-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://workbench-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

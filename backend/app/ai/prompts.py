@@ -37,6 +37,29 @@ def build_requirement_analysis_user_prompt(raw_text: str) -> str:
     return f"Requirement:\n{raw_text}"
 
 
+def build_requirement_clarification_user_prompt(
+    original_text: str, clarifications: str, prior_analysis_summary: str
+) -> str:
+    """Build the user prompt for re-analyzing a requirement with engineer clarifications.
+
+    This variant includes the prior analysis summary to help the AI understand what
+    was previously identified, so it can incorporate the clarifications without
+    breaking ID continuity or losing the original structure.
+    """
+    return (
+        f"Original Requirement:\n{original_text}\n\n"
+        f"Prior Analysis:\n{prior_analysis_summary}\n\n"
+        f"Engineer Clarifications:\n{clarifications}\n\n"
+        f"CRITICAL INSTRUCTIONS:\n"
+        f"1. Preserve ALL existing IDs exactly as shown (FR-001, FR-002, etc)\n"
+        f"2. Do NOT create new IDs or renumber existing ones\n"
+        f"3. Do NOT remove any items from the prior analysis\n"
+        f"4. Only update ambiguities marked as 'RESOLVED' in clarifications\n"
+        f"5. Keep all other ambiguities unchanged with identical IDs\n"
+        f"6. Return the EXACT SAME STRUCTURE as before, with only resolved ambiguities removed\n"
+    )
+
+
 TASK_DECOMPOSITION_SYSTEM_PROMPT = """\
 You are a senior software engineer turning an already-analyzed requirement \
 into a structured engineering plan. You are planning the work, not doing it \
@@ -188,6 +211,11 @@ consistent with the accepted recommendation's files_to_change. Never an \
 absolute path, and never containing "..".
 - content: the actual proposed file content.
 - description: a short note on what this artifact is and why it exists.
+
+IMPORTANT: For TEST artifacts, generate Python test files using pytest, not \
+other languages. Use standard pytest conventions (test_*.py or *_test.py, \
+test functions prefixed with test_). The validation system runs pytest -q \
+to validate all TEST artifacts.
 
 Stay within the scope of the accepted recommendation — do not invent \
 additional files, features, or changes it didn't call for. If the \
