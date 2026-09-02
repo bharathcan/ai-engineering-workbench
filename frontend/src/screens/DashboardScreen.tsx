@@ -6,6 +6,7 @@ import { ProjectNetwork } from '../components/ProjectNetwork'
 import { FlowSteps } from '../components/FlowSteps'
 import { StageFlow } from './StageFlow'
 import { TalpLanding } from './TalpLanding'
+import './DashboardProject.css'
 
 export function DashboardScreen({
   project,
@@ -53,89 +54,86 @@ function DashboardProject({ project }: { project: ProjectData }) {
   return (
     <div className="project-dashboard-container">
       <div className="project-dashboard">
-      {/* Header */}
-      <div className="project-header">
-        <div className="project-header__content">
-          <h1 className="project-header__id">{requirement.id}</h1>
-          <p className="project-header__text">{requirement.text}</p>
+        {/* Header */}
+        <div className="proj-header">
+          <h1 className="proj-header__id">{requirement.id}</h1>
+          <p className="proj-header__text">{requirement.text}</p>
         </div>
-      </div>
 
-      {/* Status Bar */}
-      <div className="status-bar">
-        <div className="status-bar__stage">
-          <span className="status-bar__label">Current Stage</span>
-          <span className="status-bar__value">{stage.label}</span>
-        </div>
-        <div className="status-bar__flow">
+        {/* Status Bar */}
+        <div className="proj-status">
+          <div className="proj-status__row">
+            <span className="proj-status__label">Current Stage</span>
+            <span className={`proj-status__value${plan?.status === 'BLOCKED' ? ' proj-status__value--blocked' : ''}`}>
+              {stage.label}
+            </span>
+          </div>
           <StageFlow currentIndex={stage.index} />
         </div>
-      </div>
 
-      {/* Alerts */}
-      {plan?.status === 'BLOCKED' && (
-        <div className="alert alert--error">
-          <span className="alert__icon">⚠️</span>
+        {/* Alerts */}
+        {plan?.status === 'BLOCKED' && (
+          <div className="proj-alert">
+            <span className="proj-alert__icon">⚠️</span>
+            <div>
+              <div className="proj-alert__title">Plan Blocked</div>
+              <div className="proj-alert__message">{plan.blocked_reason}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Project Network Visualization */}
+        <ProjectNetwork tasks={plan?.tasks} />
+
+        {/* Metrics Grid */}
+        <div className="proj-metrics">
+          <h2 className="proj-metrics__title">Project Overview</h2>
+          <div className="proj-metrics__grid">
+            <MetricCard
+              label="Tasks"
+              value={`${approvedTasks}/${totalTasks}`}
+              status={approvedTasks === totalTasks && totalTasks > 0 ? 'complete' : 'progress'}
+              icon="✓"
+            />
+            <MetricCard
+              label="AI Runs"
+              value={aiRunCount}
+              status={aiRunCount > 0 ? 'active' : 'inactive'}
+              icon="⚡"
+            />
+            <MetricCard
+              label="Artifacts"
+              value={artifactCount}
+              status={artifactCount > 0 ? 'active' : 'inactive'}
+              icon="📦"
+            />
+            <MetricCard
+              label="Validations"
+              value={`${passed}/${validations.length}`}
+              status={failed === 0 && passed > 0 ? 'success' : failed > 0 ? 'warning' : 'neutral'}
+              icon={failed === 0 ? '✓' : '⚠'}
+            />
+          </div>
+        </div>
+
+        {/* Quick Tips */}
+        <div className="proj-tip">
+          <div className="proj-tip__icon">💡</div>
           <div>
-            <div className="alert__title">Plan Blocked</div>
-            <div className="alert__message">{plan.blocked_reason}</div>
-          </div>
-        </div>
-      )}
-
-      {/* Project Network Visualization */}
-      <ProjectNetwork tasks={plan?.tasks} />
-
-      {/* Metrics Grid */}
-      <div className="metrics-section">
-        <h2 className="metrics-section__title">Project Overview</h2>
-        <div className="metrics-grid">
-          <MetricCard
-            label="Tasks"
-            value={`${approvedTasks}/${totalTasks}`}
-            status={approvedTasks === totalTasks ? 'complete' : 'progress'}
-            icon="✓"
-          />
-          <MetricCard
-            label="AI Runs"
-            value={aiRunCount}
-            status={aiRunCount > 0 ? 'active' : 'inactive'}
-            icon="⚡"
-          />
-          <MetricCard
-            label="Artifacts"
-            value={artifactCount}
-            status={artifactCount > 0 ? 'active' : 'inactive'}
-            icon="📦"
-          />
-          <MetricCard
-            label="Validations"
-            value={`${passed}/${validations.length}`}
-            status={failed === 0 && passed > 0 ? 'success' : failed > 0 ? 'warning' : 'neutral'}
-            icon={failed === 0 ? '✓' : '⚠'}
-          />
-        </div>
-      </div>
-
-      {/* Quick Tips */}
-      <div className="tips-box">
-        <div className="tips-box__icon">💡</div>
-        <div className="tips-box__content">
-          <div className="tips-box__title">Next Step</div>
-          <div className="tips-box__text">
-            Follow the workflow: Requirement → Plan → Tasks → AI Runs → Artifacts → Validation → Final Report
+            <div className="proj-tip__title">Next Step</div>
+            <div className="proj-tip__text">
+              Follow the workflow: Requirement → Plan → Tasks → AI Runs → Artifacts → Validation → Final Report
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <aside className="project-sidebar">
-      <FlowSteps currentStep={stage.index} />
-    </aside>
+      <aside className="project-sidebar">
+        <FlowSteps currentStep={stage.index} />
+      </aside>
     </div>
   )
 }
-
 
 function MetricCard({
   label,
@@ -149,11 +147,11 @@ function MetricCard({
   icon: string
 }) {
   return (
-    <div className={`metric-card metric-card--${status}`}>
-      <div className="metric-card__icon">{icon}</div>
-      <div className="metric-card__content">
-        <div className="metric-card__value">{value}</div>
-        <div className="metric-card__label">{label}</div>
+    <div className={`proj-metric proj-metric--${status}`}>
+      <div className="proj-metric__icon">{icon}</div>
+      <div>
+        <div className="proj-metric__value">{value}</div>
+        <div className="proj-metric__label">{label}</div>
       </div>
     </div>
   )
