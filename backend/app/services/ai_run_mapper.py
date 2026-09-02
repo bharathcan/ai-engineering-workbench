@@ -15,6 +15,7 @@ def to_ai_run_response(run: AIRun) -> AIRunResponse:
         model=run.model,
         assistance_type=run.assistance_type,
         instructions=run.instructions,
+        prompt=run.prompt,
         status=run.status,
         response=AIRecommendation.model_validate(run.response) if run.response else None,
         error=run.error,

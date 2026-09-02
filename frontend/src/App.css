@@ -1,24 +1,15 @@
-.shell {
-  max-width: 640px;
-  margin: 4rem auto;
-  padding: 0 1.5rem;
+.status {
+  font-weight: 600;
+}
+
+.status--bar {
+  margin: 0;
+  padding: 0.4rem 1.5rem;
+  font-size: 0.85rem;
   text-align: center;
   font-family: system-ui, sans-serif;
-}
-
-.shell h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.shell p {
-  color: #444;
-  line-height: 1.5;
-}
-
-.status {
-  margin-top: 2rem;
-  font-weight: 600;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .status--loading {

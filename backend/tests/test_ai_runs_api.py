@@ -85,7 +85,11 @@ def test_successful_ai_assist_returns_recommendation(client):
     assert run["error"] is None
     assert run["decisions"] == []
     assert run["revised_from_ai_run_id"] is None
-    assert "prompt" not in run  # not exposed via the API — see docs/api-design.md
+    # Phase 11 reversed Phase 5's original exclusion — prompt is now
+    # exposed for engineer visibility (see app/schemas/ai_run.py); it
+    # never contains secrets, so there's nothing sensitive to withhold.
+    assert "prompt" in run
+    assert run["prompt"]
 
 
 def test_ai_provider_failure_returns_503_and_persists_failed_run(client):

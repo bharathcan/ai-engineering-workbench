@@ -33,6 +33,15 @@ class AIRunResponse(BaseModel):
     model: str
     assistance_type: AIAssistRequestType
     instructions: str | None
+    # Reversed from Phase 5's original exclusion (see
+    # docs/validation/PHASE-5-SECURITY-REVIEW.md "AI response storage"):
+    # prompts here never contain secrets (verified — API keys never flow
+    # into prompt construction), and engineer visibility into exactly what
+    # was asked of the AI is core to the human-in-the-loop transparency
+    # Phase 11's AI Run screen requires. The exclusion was about reducing
+    # redundant API surface, not about secrecy — revisit if prompts ever
+    # start including anything sensitive.
+    prompt: str
     status: Literal["COMPLETED", "FAILED"]
     response: AIRecommendation | None
     error: str | None

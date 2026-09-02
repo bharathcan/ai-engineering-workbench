@@ -18,6 +18,16 @@ def create_requirement(db: Session, text: str) -> Requirement:
         raise PersistenceError("Failed to create requirement.") from exc
 
 
+def list_requirements(db: Session) -> list[Requirement]:
+    """Newest first — used by the Phase 11 project selector. No pagination
+    yet; fine at this scale, revisit if requirement volume ever grows large
+    enough for it to matter."""
+    try:
+        return db.query(Requirement).order_by(Requirement.id.desc()).all()
+    except SQLAlchemyError as exc:
+        raise PersistenceError("Failed to list requirements.") from exc
+
+
 def get_requirement_by_public_id(db: Session, requirement_id: str) -> Requirement | None:
     numeric_id = _parse_public_id(requirement_id)
     if numeric_id is None:

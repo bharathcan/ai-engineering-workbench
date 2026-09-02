@@ -56,6 +56,15 @@ def analyze_requirement(
         raise HTTPException(status_code=500, detail="Failed to store the analysis.") from exc
 
 
+@router.get("", response_model=list[RequirementResponse])
+def list_requirements(db: Session = Depends(get_db)):
+    try:
+        return requirement_service.list_requirements(db)
+    except PersistenceError as exc:
+        logger.error("Failed to list requirements: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to list requirements.") from exc
+
+
 @router.get("/{requirement_id}", response_model=RequirementResponse)
 def get_requirement(requirement_id: str, db: Session = Depends(get_db)):
     try:

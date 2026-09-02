@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import { fetchHealth } from './api/health'
-import { RequirementAnalyzer } from './components/RequirementAnalyzer'
+import { AppShell } from './components/AppShell'
 
 type BackendStatus =
   | { state: 'loading' }
@@ -29,21 +29,14 @@ function App() {
   }, [])
 
   return (
-    <main className="shell">
-      <h1>AI Engineering Workbench</h1>
-      <p>
-        Transform software requirements into
-        <br />
-        validated engineering outcomes with AI assistance.
-      </p>
-      <p className={`status status--${backend.state}`}>
+    <>
+      <p className={`status status--${backend.state} status--bar`}>
         {backend.state === 'loading' && 'Status: Checking backend…'}
         {backend.state === 'connected' && 'Status: Connected'}
         {backend.state === 'unavailable' && 'Status: Backend unavailable'}
       </p>
-
-      <RequirementAnalyzer />
-    </main>
+      <AppShell />
+    </>
   )
 }
 
