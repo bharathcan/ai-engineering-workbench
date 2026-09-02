@@ -1,25 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #1a202c;
+}
+
+button {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 .status {
   font-weight: 600;
 }
 
 .status--bar {
   margin: 0;
-  padding: 0.4rem 1.5rem;
+  padding: 0.6rem 1.5rem;
   font-size: 0.85rem;
   text-align: center;
-  font-family: system-ui, sans-serif;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+  border-bottom: 1px solid #0f172a;
+  color: #e2e8f0;
 }
 
 .status--loading {
-  color: #888;
+  color: #fbbf24;
 }
 
 .status--connected {
-  color: #1a7f37;
+  color: #4ade80;
 }
 
 .status--unavailable {
-  color: #cf222e;
+  color: #f87171;
 }
