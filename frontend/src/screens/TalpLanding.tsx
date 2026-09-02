@@ -1,34 +1,22 @@
-import { useEffect, useState } from 'react'
 import '../styles/talp-design.css'
 import { NetworkBackground } from '../components/NetworkBackground'
-import { listRequirements, type RequirementResponse } from '../api/requirements'
+import type { RequirementResponse } from '../api/requirements'
 import type { ScreenId } from '../components/AppShell'
 
-export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: {
+export function TalpLanding({
+  onNavigate,
+  selectedProjectId,
+  onProjectSelect,
+  projects = [],
+  projectsError = null,
+}: {
   onNavigate: (screen: ScreenId) => void
   selectedProjectId?: string | null
   onProjectSelect?: (projectId: string) => void
+  projects?: RequirementResponse[]
+  projectsError?: string | null
 }) {
-  const [projects, setProjects] = useState<RequirementResponse[]>([])
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true)
-        setLoadError(null)
-        const list = await listRequirements()
-        setProjects(list)
-      } catch (error) {
-        setLoadError('Unable to load projects. Backend service is unavailable.')
-        setProjects([])
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchProjects()
-  }, [])
+  const loadError = projectsError
   return (
     <>
       <NetworkBackground />
@@ -85,11 +73,8 @@ export function TalpLanding({ onNavigate, selectedProjectId, onProjectSelect }: 
                   onNavigate('dashboard')
                 }
               }}
-              disabled={loading}
             >
-              <option value="">
-                {loading ? '-- Loading Projects --' : '-- Select a Project --'}
-              </option>
+              <option value="">-- Select a Project --</option>
               {projects.length > 0 ? (
                 projects.map((project) => (
                   <option key={project.id} value={project.id}>

@@ -112,7 +112,14 @@ export function AppShell() {
         {error && <p className="app-shell__error">{error}</p>}
 
         {activeScreen === 'dashboard' && (
-          <DashboardScreen project={data} onNavigate={navigateTo} />
+          <DashboardScreen
+            project={data}
+            onNavigate={navigateTo}
+            projects={projects}
+            projectsError={projectsError}
+            selectedProjectId={selectedId}
+            onProjectSelect={setSelectedId}
+          />
         )}
         {activeScreen === 'requirement' && (
           <RequirementScreen

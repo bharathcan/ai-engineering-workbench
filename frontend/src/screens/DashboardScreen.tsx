@@ -1,4 +1,5 @@
 import type { ScreenId } from '../components/AppShell'
+import type { RequirementResponse } from '../api/requirements'
 import { flattenAiRuns, flattenArtifacts, flattenValidations, type ProjectData } from '../hooks/useProjectData'
 import { computeWorkflowStage } from '../hooks/workflowStage'
 import { ProjectNetwork } from '../components/ProjectNetwork'
@@ -9,12 +10,28 @@ import { TalpLanding } from './TalpLanding'
 export function DashboardScreen({
   project,
   onNavigate,
+  projects,
+  projectsError,
+  selectedProjectId,
+  onProjectSelect,
 }: {
   project: ProjectData | null
   onNavigate: (screen: ScreenId) => void
+  projects?: RequirementResponse[]
+  projectsError?: string | null
+  selectedProjectId?: string | null
+  onProjectSelect?: (projectId: string) => void
 }) {
   if (!project) {
-    return <TalpLanding onNavigate={onNavigate} />
+    return (
+      <TalpLanding
+        onNavigate={onNavigate}
+        projects={projects}
+        projectsError={projectsError}
+        selectedProjectId={selectedProjectId}
+        onProjectSelect={onProjectSelect}
+      />
+    )
   }
 
   return <DashboardProject project={project} />
