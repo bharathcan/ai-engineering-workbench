@@ -19,7 +19,7 @@
 
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: var(--color-bg);
+  background: #f5f7fa;
   color: var(--color-text);
   line-height: 1.6;
   overflow-x: hidden;
@@ -50,9 +50,69 @@ canvas {
   height: 100%;
 }
 
+/* Projects Bar */
+
+.projects-bar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+  z-index: 99;
+}
+
+.projects-bar__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.projects-bar__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.projects-bar__list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.project-badge {
+  padding: 0.4rem 1rem;
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.project-badge:hover {
+  border-color: var(--color-accent);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.project-badge--active {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
 /* Header Navigation - Minimal */
 
 .header {
+  padding-top: 0 !important;
   position: fixed;
   top: 0;
   left: 0;
@@ -119,6 +179,10 @@ canvas {
   padding-top: 80px;
   position: relative;
   z-index: 1;
+}
+
+.projects-bar ~ .container {
+  padding-top: 140px;
 }
 
 /* Hero Section */

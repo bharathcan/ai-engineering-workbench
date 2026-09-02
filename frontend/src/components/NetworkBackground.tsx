@@ -57,19 +57,19 @@ export function NetworkBackground() {
         ctx.fill()
       })
 
-      // Draw lines between nearby particles
+      // Draw lines between nearby particles (less dense)
       for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
+        for (let j = i + 1; j < Math.min(i + 8, particles.length); j++) {
           const p1 = particles[i]
           const p2 = particles[j]
           const dx = p2.x - p1.x
           const dy = p2.y - p1.y
           const dist = Math.sqrt(dx * dx + dy * dy)
 
-          if (dist < 250) {
-            const alpha = (1 - dist / 250) * 0.6
+          if (dist < 180) {
+            const alpha = (1 - dist / 180) * 0.4
             ctx.strokeStyle = `rgba(37, 99, 235, ${alpha})`
-            ctx.lineWidth = 2
+            ctx.lineWidth = 1.5
             ctx.beginPath()
             ctx.moveTo(p1.x, p1.y)
             ctx.lineTo(p2.x, p2.y)
