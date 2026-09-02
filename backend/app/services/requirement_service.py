@@ -70,6 +70,11 @@ def clarify_requirement(
     )
 
     requirement_repository.save_analysis(db, requirement, result)
+
+    # Delete old plans to force regeneration with updated analysis
+    from app.repositories import engineering_plan_repository
+    engineering_plan_repository.delete_plans_by_requirement(db, requirement)
+
     db.refresh(requirement)
     return _to_response(requirement)
 
