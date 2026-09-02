@@ -3,6 +3,7 @@ import type { ScreenId } from '../components/AppShell'
 import { flattenAiRuns, flattenArtifacts, flattenValidations, type ProjectData } from '../hooks/useProjectData'
 import { computeWorkflowStage } from '../hooks/workflowStage'
 import { StageFlow } from './StageFlow'
+import { TalpLanding } from './TalpLanding'
 
 export function DashboardScreen({
   project,
@@ -12,7 +13,7 @@ export function DashboardScreen({
   onNavigate: (screen: ScreenId) => void
 }) {
   if (!project) {
-    return <DashboardLanding onNavigate={onNavigate} />
+    return <TalpLanding onNavigate={onNavigate} />
   }
 
   return <DashboardProject project={project} />
