@@ -1,6 +1,6 @@
 # Frontend
 
-React + TypeScript frontend for the AI Engineering Workbench, scaffolded with Vite. As of Phase 4, it displays backend connectivity, a Requirement Analyzer form, and an Engineering Plan view with per-task Accept/Modify/Reject review. Artifact management and a validation dashboard are not implemented yet. See [../ARCHITECTURE.md](../ARCHITECTURE.md) for the full intended scope.
+React + TypeScript frontend for the AI Engineering Workbench, built with Vite. Implements the full workflow UI: landing/dashboard, requirement analysis, engineering plan review, task execution with AI assistance, artifact review, validation, a scenarios showcase, and a final report — all backed by the real backend API. See [../README.md](../README.md) and [../ARCHITECTURE.md](../ARCHITECTURE.md) for the full system picture; this file covers frontend-specific setup and structure.
 
 ## Setup
 
@@ -23,7 +23,15 @@ Opens at [http://localhost:5173](http://localhost:5173). The backend is expected
 npm run build
 ```
 
-Type-checks (`tsc -b`) and produces a production bundle in `dist/`.
+Type-checks (`tsc -b`) and produces a production bundle in `dist/`. This is what Render's `workbench-frontend` static site deploys.
+
+## Test
+
+```bash
+npm run test
+```
+
+Vitest + React Testing Library. A few `AppShell`/`ScenariosScreen` assertions currently fail after an earlier UI redesign changed how the empty-project state renders — a test-maintenance gap, not a functional regression (see README.md §12).
 
 ## Lint
 
@@ -31,12 +39,24 @@ Type-checks (`tsc -b`) and produces a production bundle in `dist/`.
 npm run lint
 ```
 
-Uses [oxlint](https://oxc.rs) (the Vite template default) rather than ESLint, for lighter, faster tooling.
+Uses [oxlint](https://oxc.rs) rather than ESLint, for lighter, faster tooling.
 
 ## What it does
 
-On load, the app calls `GET /health` on the backend (`src/api/health.ts`) and displays one of three states: `Checking backend…` (loading), `Connected` (backend responded with `{"status": "ok"}`), or `Backend unavailable` (request failed or backend returned something else).
+`AppShell` (`src/components/AppShell.tsx`) hosts the project selector and navigation across 9 screens:
 
-Below that, the Requirement Analyzer (`src/components/RequirementAnalyzer.tsx`) takes a requirement in a textarea and, on submit, calls `POST /api/v1/requirements` then `POST /api/v1/requirements/{id}/analyze` (`src/api/requirements.ts`), then renders the structured result: summary, functional/non-functional requirements, ambiguities, assumptions, constraints, success criteria, and engineering concerns. Ambiguities and assumptions are styled distinctly (amber vs. blue) so they aren't mistaken for each other. API errors (e.g. no AI provider configured) are shown inline rather than failing silently.
+| Screen | Purpose |
+|---|---|
+| Dashboard | Landing page (`TalpLanding`) when no project is selected; project overview once one is |
+| Requirement | Create a requirement, run analysis, resolve ambiguities, see the structured result |
+| Engineering Plan | Trigger task decomposition; view the generated plan or the ambiguity-gate block reason |
+| Tasks | Per-task detail — Accept/Modify/Reject, request AI assistance, review AI runs, generate artifacts |
+| AI Runs | Full history of AI requests/responses across all tasks, with confidence and decisions |
+| Artifacts | Generated files — content, diffs against prior versions, Accept/Modify/Reject |
+| Validation | Run and review allowlisted validation checks against approved artifacts |
+| Scenarios | Live walkthroughs of the greenfield/brownfield/ambiguous demonstration scenarios |
+| Final Report | Aggregated, exportable summary of a project's full pipeline |
 
-Once an analysis is shown, `EngineeringPlanPanel` (`src/components/EngineeringPlanPanel.tsx`) offers a "Generate Engineering Plan" button that calls `POST /api/v1/requirements/{id}/tasks` (`src/api/tasks.ts`). A `GENERATED` plan renders each task as a card — id, type, description, requirement traceability, dependencies, acceptance criteria, AI-assistance type — with Accept / Modify / Reject buttons that call `POST /api/v1/tasks/{task_id}/decision`; Modify and Reject open a small form requiring rationale text before submitting, matching the backend's validation. A `BLOCKED` plan (unresolved material ambiguity) renders as a distinct "PLAN BLOCKED" panel with the reason, instead of any tasks.
+`src/hooks/useProjectData.ts` assembles one consistent data snapshot per selected requirement (requirement + analysis, plan + tasks + AI runs, each task's artifacts, each artifact's validations) so every screen reads from the same state instead of re-fetching independently. Task-artifact and artifact-validation fetches run concurrently (`Promise.all`), not sequentially — an earlier sequential version made 40+ round trips on a single reload once a project accumulated enough tasks and artifacts.
+
+`src/api/` holds one typed fetch client per backend resource (requirements, tasks, artifacts, validations, urls) — no screen calls `fetch` directly.
