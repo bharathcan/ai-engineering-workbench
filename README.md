@@ -4,6 +4,18 @@
 >
 > Demonstrated end-to-end via the mandatory use case: **build a scalable URL shortener service with APIs, persistence, and analytics.**
 
+**🔗 Live application:** **[workbench-frontend-dtvi.onrender.com](https://workbench-frontend-dtvi.onrender.com/)**
+
+Hosted on [Render](https://render.com) as three connected services defined in [`render.yaml`](render.yaml):
+
+| Service | Type | What it is |
+|---|---|---|
+| `workbench-frontend` | Static site | The React UI above — select a project from the dropdown or create a new one |
+| `workbench-backend` | Docker web service (FastAPI) | The API the frontend calls; talks to the real Anthropic API for `/analyze` and AI-assist |
+| `workbench-db` | Managed PostgreSQL | Persistent storage — real Postgres in production, not just SQLite |
+
+All three are live right now, not just deployable — see §16 for what's actually been run against them.
+
 ---
 
 ## 1. Project
@@ -190,11 +202,22 @@ Opens at [http://localhost:5173](http://localhost:5173).
 
 ### Deploying to Render
 
-`render.yaml` defines a Blueprint: backend as a Docker web service, frontend as a static site, managed PostgreSQL. **This is deployed and live** — `workbench-backend`, `workbench-frontend`, and `workbench-db` are all running, with the backend actually exercising the Postgres path.
+`render.yaml` defines a Blueprint: backend as a Docker web service, frontend as a static site, managed PostgreSQL. **This is deployed and live right now:**
+
+| | URL |
+|---|---|
+| Frontend (UI) | https://workbench-frontend-dtvi.onrender.com |
+| Backend (API) | https://workbench-backend-xxu1.onrender.com |
+| Health check | https://workbench-backend-xxu1.onrender.com/health |
+
+The `-dtvi` / `-xxu1` suffixes are Render-assigned, since the plain `workbench-frontend`/`workbench-backend` names were already taken — `render.yaml`'s `CORS_ORIGINS` and `VITE_API_BASE_URL` are set to these exact live URLs, not the plain guessed names, so the deployed frontend and backend can actually talk to each other.
+
+To deploy your own copy:
 
 1. Render dashboard → **New → Blueprint** → connect this repo
 2. `AI_API_KEY` is deliberately **not** in `render.yaml` (`sync: false`) — set it manually on the backend service
 3. `DATABASE_URL` wires automatically from the Postgres instance
+4. Update `CORS_ORIGINS` (backend) and `VITE_API_BASE_URL` (frontend) in `render.yaml` to match whatever URLs Render actually assigns your services — check the dashboard after the first deploy, since a taken name gets a random suffix just like it did here
 
 **Disclosed limitations:** no CI/CD, no staging environment, no rollback strategy beyond Render's deploy history. Free-tier services can have a slow first request after idling (cold start) — observed directly during live testing, not a code defect.
 
