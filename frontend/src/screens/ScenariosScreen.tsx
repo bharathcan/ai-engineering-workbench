@@ -164,8 +164,8 @@ function BrownfieldTab() {
       </ul>
       <p>
         Full write-up with both "before" and "after" (including the race, reported rather than
-        discarded) is in <code>docs/scenarios/brownfield.md</code>, with the durable,
-        re-runnable proof in <code>backend/tests/test_brownfield_performance_flow.py</code>.
+        discarded) is in the root <code>README.md</code> (Demonstration Scenarios), with the
+        durable, re-runnable proof in <code>backend/tests/test_brownfield_performance_flow.py</code>.
       </p>
     </div>
   )
@@ -275,10 +275,9 @@ function AmbiguousTab({
         ))}
         <p>
           Interpretation C was chosen and implemented with privacy mitigations (hashed IP, no
-          fabricated geographic data) — see{' '}
-          <code>docs/adr/ADR-005-advanced-analytics-privacy.md</code>. This reused implementation
-          is not repeated by this demo button; the button above demonstrates the gate itself using
-          a fresh requirement so it can be re-run at any time.
+          fabricated geographic data) — see <code>ARCHITECTURE.md</code> (Key Design Decisions).
+          This reused implementation is not repeated by this demo button; the button above
+          demonstrates the gate itself using a fresh requirement so it can be re-run at any time.
         </p>
         <button type="button" onClick={() => onNavigate('report')}>
           See the Final Report for how this was ultimately resolved
