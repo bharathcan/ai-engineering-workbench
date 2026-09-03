@@ -83,7 +83,7 @@ export function ScenariosScreen({
       </div>
 
       {tab === 'greenfield' && <GreenfieldTab project={project} onNavigate={onNavigate} />}
-      {tab === 'brownfield' && <BrownfieldTab />}
+      {tab === 'brownfield' && <BrownfieldTab project={project} onNavigate={onNavigate} />}
       {tab === 'ambiguous' && (
         <AmbiguousTab onRequirementCreated={onRequirementCreated} onNavigate={onNavigate} />
       )}
@@ -122,7 +122,13 @@ function GreenfieldTab({
   )
 }
 
-function BrownfieldTab() {
+function BrownfieldTab({
+  project,
+  onNavigate,
+}: {
+  project: ProjectData | null
+  onNavigate: (screen: ScreenId) => void
+}) {
   return (
     <div>
       <h3>Brownfield — Existing URL shortener with slow redirects</h3>
@@ -132,11 +138,21 @@ function BrownfieldTab() {
       </p>
       <p>
         Unlike the Greenfield case, this scenario runs the workbench against an{' '}
-        <em>already-built</em> system (the Phase 8 URL shortener) instead of starting from nothing.
-        The Requirement Analyzer flagged that "slow" was never quantified — no baseline or target
-        was given — which had to be resolved by measuring the real system before proposing a fix,
-        not by assuming a number.
+        <em>already-built</em> system (the URL shortener's redirect endpoint, built and approved as
+        its own task) instead of starting from nothing. The Requirement Analyzer flagged that "slow"
+        was never quantified — no baseline or target was given — which had to be resolved by
+        measuring the real system before proposing a fix, not by assuming a number.
       </p>
+      <p>
+        This is registered live as its own requirement, not just a narrative — select it from the
+        project selector at the top of the page, then use the Dashboard, Engineering Plan, and Tasks
+        screens to see the real analysis, the ambiguities it raised, and the resulting plan.
+      </p>
+      {project && (
+        <button type="button" onClick={() => onNavigate('dashboard')}>
+          View selected project's Dashboard
+        </button>
+      )}
       <ul>
         <li>
           <strong>Baseline measured:</strong> p50 0.981&nbsp;ms, p95 1.185&nbsp;ms, throughput
