@@ -25,6 +25,11 @@ def list_requirements(db: Session) -> list[RequirementResponse]:
     return [_to_response(r) for r in requirement_repository.list_requirements(db)]
 
 
+def delete_requirement(db: Session, requirement_id: str) -> None:
+    requirement = _get_or_raise(db, requirement_id)
+    requirement_repository.delete_requirement(db, requirement)
+
+
 def analyze_requirement(
     db: Session, requirement_id: str, ai_provider_factory: Callable[[], AIProvider]
 ) -> RequirementResponse:

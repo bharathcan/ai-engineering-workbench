@@ -2,6 +2,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import PersistenceError
+from app.models.engineering_plan import (
+    AIRun,
+    Artifact,
+    EngineerDecision,
+    EngineeringPlan,
+    EngineeringTask,
+    Validation,
+)
 from app.models.requirement import Requirement, RequirementAnalysis
 from app.schemas.requirement_analysis import RequirementAnalysisResult
 
@@ -95,6 +103,91 @@ def to_analysis_result(analysis: RequirementAnalysis) -> RequirementAnalysisResu
         success_criteria=analysis.success_criteria,
         engineering_concerns=analysis.engineering_concerns,
     )
+
+
+def delete_requirement(db: Session, requirement: Requirement) -> None:
+    """Deletes a requirement and everything traceable back to it: its
+    analyses, plans, tasks, AI runs, artifacts, validations, and engineer
+    decisions. No ON DELETE CASCADE exists at the DB level (see
+    app.main — schema comes from create_all(), not migrations with explicit
+    cascade rules), so this walks the tree leaf-to-root itself, in
+    dependency order, within one transaction."""
+    try:
+        plan_ids = [
+            row[0]
+            for row in db.query(EngineeringPlan.id)
+            .filter(EngineeringPlan.requirement_id == requirement.id)
+            .all()
+        ]
+
+        if plan_ids:
+            task_ids = [
+                row[0]
+                for row in db.query(EngineeringTask.id)
+                .filter(EngineeringTask.plan_id.in_(plan_ids))
+                .all()
+            ]
+
+            if task_ids:
+                artifact_ids = [
+                    row[0]
+                    for row in db.query(Artifact.id)
+                    .filter(Artifact.task_id.in_(task_ids))
+                    .all()
+                ]
+                ai_run_ids = [
+                    row[0]
+                    for row in db.query(AIRun.id).filter(AIRun.task_id.in_(task_ids)).all()
+                ]
+
+                if artifact_ids:
+                    db.query(Validation).filter(
+                        Validation.artifact_id.in_(artifact_ids)
+                    ).delete(synchronize_session=False)
+
+                # Decisions reference task_id (always) plus optional
+                # ai_run_id/artifact_id — filtering by task_id alone covers
+                # every decision belonging to this requirement.
+                db.query(EngineerDecision).filter(
+                    EngineerDecision.task_id.in_(task_ids)
+                ).delete(synchronize_session=False)
+
+                if artifact_ids:
+                    # Null out the self-referential FK first so deleting the
+                    # batch doesn't trip over a row that supersedes another
+                    # row in the same batch.
+                    db.query(Artifact).filter(Artifact.id.in_(artifact_ids)).update(
+                        {Artifact.supersedes_artifact_id: None}, synchronize_session=False
+                    )
+                    db.query(Artifact).filter(Artifact.id.in_(artifact_ids)).delete(
+                        synchronize_session=False
+                    )
+
+                if ai_run_ids:
+                    db.query(AIRun).filter(AIRun.id.in_(ai_run_ids)).update(
+                        {AIRun.revised_from_ai_run_id: None}, synchronize_session=False
+                    )
+                    db.query(AIRun).filter(AIRun.id.in_(ai_run_ids)).delete(
+                        synchronize_session=False
+                    )
+
+                db.query(EngineeringTask).filter(EngineeringTask.id.in_(task_ids)).delete(
+                    synchronize_session=False
+                )
+
+            db.query(EngineeringPlan).filter(EngineeringPlan.id.in_(plan_ids)).delete(
+                synchronize_session=False
+            )
+
+        db.query(RequirementAnalysis).filter(
+            RequirementAnalysis.requirement_id == requirement.id
+        ).delete(synchronize_session=False)
+
+        db.delete(requirement)
+        db.commit()
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise PersistenceError("Failed to delete requirement.") from exc
 
 
 def _parse_public_id(requirement_id: str) -> int | None:
