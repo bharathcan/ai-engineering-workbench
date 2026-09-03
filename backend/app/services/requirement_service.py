@@ -3,7 +3,6 @@ from collections.abc import Callable
 from sqlalchemy.orm import Session
 
 from app.ai.base import AIProvider
-from app.ai.prompts import build_requirement_clarification_user_prompt
 from app.core.exceptions import RequirementNotFoundError
 from app.models.requirement import Requirement
 from app.repositories import requirement_repository
@@ -24,6 +23,11 @@ def get_requirement(db: Session, requirement_id: str) -> RequirementResponse:
 
 def list_requirements(db: Session) -> list[RequirementResponse]:
     return [_to_response(r) for r in requirement_repository.list_requirements(db)]
+
+
+def delete_requirement(db: Session, requirement_id: str) -> None:
+    requirement = _get_or_raise(db, requirement_id)
+    requirement_repository.delete_requirement(db, requirement)
 
 
 def analyze_requirement(
@@ -61,12 +65,22 @@ def clarify_requirement(
     if requirement.analyses:
         prior_analysis = requirement_repository.to_analysis_result(requirement.analyses[-1])
         # Format prior analysis as structured text for AI to reference
+        functional_reqs = [
+            f"{a.id}: {a.description}" for a in prior_analysis.functional_requirements
+        ]
+        ambiguities = [
+            f"{a.id} ({a.impact}): {a.description}" for a in prior_analysis.ambiguities
+        ]
+        constraints = [f"{a.id}: {a.description}" for a in prior_analysis.constraints]
+        success_criteria = [
+            f"{a.id}: {a.description}" for a in prior_analysis.success_criteria
+        ]
         prior_analysis_text = (
             f"Summary: {prior_analysis.summary}\n"
-            f"Functional Requirements: {[f'{a.id}: {a.description}' for a in prior_analysis.functional_requirements]}\n"
-            f"Ambiguities: {[f'{a.id} ({a.impact}): {a.description}' for a in prior_analysis.ambiguities]}\n"
-            f"Constraints: {[f'{a.id}: {a.description}' for a in prior_analysis.constraints]}\n"
-            f"Success Criteria: {[f'{a.id}: {a.description}' for a in prior_analysis.success_criteria]}"
+            f"Functional Requirements: {functional_reqs}\n"
+            f"Ambiguities: {ambiguities}\n"
+            f"Constraints: {constraints}\n"
+            f"Success Criteria: {success_criteria}"
         )
 
     # Use clarification-specific prompt to help AI preserve structure

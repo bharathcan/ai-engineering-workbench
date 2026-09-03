@@ -107,3 +107,14 @@ def get_requirement(requirement_id: str, db: Session = Depends(get_db)):
     except PersistenceError as exc:
         logger.error("Failed to load requirement %s: %s", requirement_id, exc)
         raise HTTPException(status_code=500, detail="Failed to load the requirement.") from exc
+
+
+@router.delete("/{requirement_id}", status_code=204)
+def delete_requirement(requirement_id: str, db: Session = Depends(get_db)):
+    try:
+        requirement_service.delete_requirement(db, requirement_id)
+    except RequirementNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PersistenceError as exc:
+        logger.error("Failed to delete requirement %s: %s", requirement_id, exc)
+        raise HTTPException(status_code=500, detail="Failed to delete the requirement.") from exc
