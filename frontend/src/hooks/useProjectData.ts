@@ -74,12 +74,26 @@ export function useProjectData(requirementId: string | null) {
       const artifactsByTaskId: Record<string, Artifact[]> = {}
       const validationsByArtifactId: Record<string, Validation[]> = {}
       if (plan && plan.status === 'GENERATED') {
-        for (const task of plan.tasks) {
-          artifactsByTaskId[task.id] = await getTaskArtifacts(task.id)
-          for (const artifact of artifactsByTaskId[task.id]) {
-            validationsByArtifactId[artifact.id] = await getArtifactValidations(artifact.id)
-          }
-        }
+        // Fetch every task's artifacts concurrently rather than one at a
+        // time — with N tasks this was N sequential round trips before.
+        const perTaskArtifacts = await Promise.all(
+          plan.tasks.map((task) => getTaskArtifacts(task.id)),
+        )
+        plan.tasks.forEach((task, i) => {
+          artifactsByTaskId[task.id] = perTaskArtifacts[i]
+        })
+
+        // Same fix for validations, one level down: every artifact across
+        // every task, fetched concurrently instead of nested sequential
+        // awaits (that was the real bottleneck once any task accumulated
+        // more than a handful of artifacts).
+        const allArtifacts = perTaskArtifacts.flat()
+        const perArtifactValidations = await Promise.all(
+          allArtifacts.map((artifact) => getArtifactValidations(artifact.id)),
+        )
+        allArtifacts.forEach((artifact, i) => {
+          validationsByArtifactId[artifact.id] = perArtifactValidations[i]
+        })
       }
 
       setData({ requirement, plan, artifactsByTaskId, validationsByArtifactId })
